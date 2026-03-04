@@ -1,4 +1,5 @@
 import numpy as np
+from src.rewards import count_sequences
 
 class Board:
     def __init__(self):
@@ -14,5 +15,15 @@ class Board:
             return True
         else:
             return False
+          
     def check_win(self):
-        pass  
+        seqs = count_sequences(self.base, 1, self.base.shape[0])
+        if seqs[5] >= 1:
+          print("Player 1 wins")
+          return True
+        seqs = count_sequences(self.base, 2, self.base.shape[0])
+        if seqs[5] >= 1:
+          print("Player 2 wins")
+          return True
+        
+        return False
