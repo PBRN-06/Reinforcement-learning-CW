@@ -16,7 +16,7 @@ games_per_iteration: 100  # Games to generate per training iteration
 num_workers: 4            # Parallel workers for self-play generation
 
 # Training
-num_iterations: 1000      # Total training iterations
+num_iterations: 500      # Total training iterations
 epochs_per_iteration: 10  # Training epochs per iteration
 batch_size: 256           # Training batch size (adjust for GPU memory)
 learning_rate: 0.001      # Adam learning rate
@@ -27,7 +27,7 @@ grad_clip: 5.0            # Gradient clipping norm
 replay_buffer_size: 500000  # Maximum examples to keep in buffer
 
 # Checkpointing
-checkpoint_freq: 100      # Save checkpoint every N iterations
+checkpoint_freq: 10       # Save checkpoint every N iterations
 checkpoint_dir: "./checkpoints"
 
 # Evaluation

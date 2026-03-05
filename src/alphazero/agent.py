@@ -124,7 +124,7 @@ class AlphaZeroAgent(Agent):
             path: Path to checkpoint file
         """
         print(f"Loading AlphaZero model from {path}")
-        checkpoint = torch.load(path, map_location='cpu')
+        checkpoint = torch.load(path, map_location='cpu', weights_only=False) # UNSAFE IF NOT OWN FILES - CAN BE RCE
 
         # Load model weights
         if 'model_state_dict' in checkpoint:

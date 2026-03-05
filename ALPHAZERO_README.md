@@ -92,7 +92,7 @@ num_res_blocks: 6        # More blocks = stronger but slower
 num_filters: 64          # More filters = more capacity
 
 # MCTS Parameters
-num_simulations: 400     # 200-800 (strength vs speed tradeoff)
+num_simulations: 200     # 200-800 (strength vs speed tradeoff)
 c_puct: 1.5              # Exploration constant
 
 # Training
