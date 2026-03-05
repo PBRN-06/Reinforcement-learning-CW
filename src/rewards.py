@@ -127,5 +127,31 @@ def is_valid_sequence(board : np.ndarray, start_row, start_col, dr, dc, player_i
     col = start_col + i * dc
     if board[row, col] != player_id:
       return False
+    
+  # Check either beginning or end are exposed to allow growth if lenth < 5
+  # Won't trigger if our own marker is there since before is checked before 
+  #  this functions is called, and these are checked from longest to shortest
+  #  so after can't trigger either
+  #
+  # Incorporating this should help further disuade finding 3s and 4s which are 
+  # actually blocked
+  #
+  # Still counts 5s both for win detection purposes and since those should be
+  # rewarded regardless
+  if length < 5:
+    pre_row = start_row - dr; pre_col = start_col - dc
+    post_row = start_row + length * dr; post_col = start_col + length * dc
+
+    # Check if positions are in bounds before accessing
+    pre_in_bounds = (0 <= pre_row < board_size and 0 <= pre_col < board_size)
+    post_in_bounds = (0 <= post_row < board_size and 0 <= post_col < board_size)
+
+    # Get values (0 if out of bounds = open end)
+    pre_val = board[pre_row, pre_col] if pre_in_bounds else 0
+    post_val = board[post_row, post_col] if post_in_bounds else 0
+
+    # Both ends blocked = invalid sequence
+    if pre_val != 0 and post_val != 0:
+      return False
 
   return True

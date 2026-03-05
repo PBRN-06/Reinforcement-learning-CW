@@ -1,0 +1,45 @@
+# AlphaZero Configuration for Gomoku (9x9, 5-in-a-row)
+
+# Network Architecture
+num_res_blocks: 6        # 4-6 recommended for 9x9 board
+num_filters: 64          # 64-128 filters
+
+# MCTS Parameters
+num_simulations: 400     # 200-800 (more = stronger but slower)
+c_puct: 1.5              # Exploration constant for UCB
+dirichlet_alpha: 0.3     # Noise concentration (scaled for 9x9 board)
+dirichlet_epsilon: 0.25  # Noise mixing ratio (75% network, 25% noise)
+temperature_threshold: 15 # Move number to switch from exploration to exploitation
+
+# Self-Play
+games_per_iteration: 100  # Games to generate per training iteration
+num_workers: 4            # Parallel workers for self-play generation
+
+# Training
+num_iterations: 1000      # Total training iterations
+epochs_per_iteration: 10  # Training epochs per iteration
+batch_size: 256           # Training batch size (adjust for GPU memory)
+learning_rate: 0.001      # Adam learning rate
+weight_decay: 0.0001      # L2 regularization
+grad_clip: 5.0            # Gradient clipping norm
+
+# Replay Buffer
+replay_buffer_size: 500000  # Maximum examples to keep in buffer
+
+# Checkpointing
+checkpoint_freq: 100      # Save checkpoint every N iterations
+checkpoint_dir: "./checkpoints"
+
+# Evaluation
+eval_freq: 50             # Evaluate every N iterations
+eval_games: 20            # Number of games for evaluation
+
+# Logging
+log_dir: "./logs"
+
+# Device
+device: "cuda"  # "cuda" or "cpu"
+
+# Board Settings
+board_size: 9
+win_length: 5
