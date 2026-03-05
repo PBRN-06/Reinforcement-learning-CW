@@ -1,0 +1,42 @@
+"""Configuration for 9x9 Gomoku Deep RL agent."""
+
+# Board
+BOARD_SIZE = 9
+WIN_LEN = 5
+STATE_CHANNELS = 3  # P1 stones, P2 stones, empty
+ACTION_SIZE = BOARD_SIZE * BOARD_SIZE  # 81
+
+# CNN
+CONV_FILTERS = [64, 128, 128]
+CONV_KERNEL = 3
+CONV_PADDING = 1
+LINEAR_HIDDEN = 256
+USE_BATCH_NORM = True
+
+# Training
+LR = 3e-4
+GAMMA = 0.99
+GAE_LAMBDA = 0.95
+PPO_CLIP = 0.2
+VALUE_COEF = 0.5
+ENTROPY_COEF = 0.01
+BATCH_SIZE = 64
+GAMES_PER_COLLECTION = 8
+PPO_EPOCHS = 4
+
+# Reward wrapper (pattern bonuses, decay over training)
+REWARD_WIN = 1.0
+REWARD_LOSS = -1.0
+REWARD_DRAW = 0.0
+BONUS_3_IN_ROW = 0.05
+BONUS_4_IN_ROW = 0.1
+BONUS_BLOCK_4 = 0.08
+PATTERN_DECAY_START = 1.0
+PATTERN_DECAY_END = 0.2
+
+# MCTS (optional)
+MCTS_SIMULATIONS = 4
+MCTS_C_PUCT = 1.414
+
+# Metrics
+METRICS_WINDOW = 100

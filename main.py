@@ -1,4 +1,4 @@
-from src.agent import *
+from src.agent import Agent, Player, RL_Agent
 from src.board import Board
 from src.rewards import calculate_reward
 
@@ -7,7 +7,9 @@ from PySide6.QtCore import Qt
 import sys
 from typing import Literal
 
-#game loop
+# Game: human (Player) vs agent. Use RL_Agent for random moves.
+# To use a trained gomoku_rl policy: from src.agent import TrainedGomokuAgent
+# and set players = (Player(), TrainedGomokuAgent("checkpoint_iter_100.pt"))
 board = Board()
 players = (Player(), RL_Agent())
 
