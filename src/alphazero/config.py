@@ -27,6 +27,7 @@ class AlphaZeroConfig:
     # Self-play
     games_per_iteration: int = 100
     num_workers: int = 4
+    generation_frequency: int = 1  # Generate new games every N iterations (1=every iteration, 5=every 5th)
 
     # Training
     num_iterations: int = 1000

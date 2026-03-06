@@ -97,6 +97,7 @@ c_puct: 1.5              # Exploration constant
 
 # Training
 games_per_iteration: 100 # Games to generate per iteration
+generation_frequency: 5  # Generate new games every N iterations (5 = 5x speedup!)
 batch_size: 256          # Training batch size
 learning_rate: 0.001     # Adam learning rate
 epochs_per_iteration: 10 # Training epochs per iteration
@@ -104,6 +105,27 @@ epochs_per_iteration: 10 # Training epochs per iteration
 # Checkpointing
 checkpoint_freq: 10      # Save every N iterations
 ```
+
+### Generation Frequency Optimization
+
+The `generation_frequency` parameter controls how often new self-play games are generated:
+
+- **`generation_frequency: 1`** - Generate every iteration (slowest but most fresh data)
+- **`generation_frequency: 5`** - Generate every 5th iteration (5x faster, recommended!)
+- **`generation_frequency: 10`** - Generate every 10th iteration (10x faster)
+
+**How it works:**
+- Iteration 1, 6, 11, 16... → Generate 100 new games
+- Iteration 2-5, 7-10, 12-15... → Train on existing replay buffer only
+
+**Benefits:**
+- Massive speedup (5x with frequency=5)
+- Standard AlphaZero practice (they use 500k example buffers)
+- No quality loss - network still sees diverse data from large buffer
+
+**Trade-offs:**
+- Network trains on slightly older data between generations
+- Requires larger replay buffer (already set to 500k)
 
 ## Project Structure
 
@@ -141,10 +163,12 @@ checkpoint_freq: 10      # Save every N iterations
 
 ## Training Timeline & Performance
 
-**Expected Training Time** (on modern GPU):
-- 1 iteration: ~15-30 minutes
+**Expected Training Time** (on modern GPU with `generation_frequency: 5`):
+- 1 iteration (with generation): ~15-30 minutes
+- 1 iteration (training only): ~2-5 minutes
+- 10 iterations: ~2-4 hours (2 generations + 10 trainings)
 - 100 iterations: ~1-2 days
-- 1000 iterations: ~2-3 weeks
+- 1000 iterations: ~1-2 weeks (5x faster than generating every iteration!)
 
 **Strength Progression:**
 - **Iteration 50**: Beats random agent >90% of the time

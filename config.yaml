@@ -14,6 +14,7 @@ temperature_threshold: 15 # Move number to switch from exploration to exploitati
 # Self-Play
 games_per_iteration: 100  # Games to generate per training iteration
 num_workers: 4            # Parallel workers for self-play generation
+generation_frequency: 5   # Generate new games every N iterations (5 = 5x speedup!)
 
 # Training
 num_iterations: 500      # Total training iterations

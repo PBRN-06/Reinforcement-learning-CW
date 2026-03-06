@@ -69,6 +69,7 @@ class AlphaZeroTrainer:
         print(f"Device: {self.device}")
         print(f"Network: {self.config.num_res_blocks} ResBlocks, {self.config.num_filters} filters")
         print(f"MCTS: {self.config.num_simulations} simulations per move")
+        print(f"Generation: Every {self.config.generation_frequency} iteration(s)")
         print(f"{'=' * 60}\n")
 
         for iteration in range(self.config.num_iterations):
@@ -78,16 +79,23 @@ class AlphaZeroTrainer:
             print(f"Iteration {self.iteration}/{self.config.num_iterations}")
             print(f"{'=' * 60}")
 
-            # Step 1: Self-play
-            print(f"\n[1/3] Generating {self.config.games_per_iteration} self-play games...")
-            self_play_manager = SelfPlayManager(self.network, self.config)
-            examples = self_play_manager.generate_games(self.config.games_per_iteration)
+            # Step 1: Self-play (conditional based on generation_frequency)
+            should_generate = (self.iteration % self.config.generation_frequency == 1) or (self.iteration == 1)
 
-            # Step 2: Add to replay buffer
-            print(f"\n[2/3] Adding {len(examples)} examples to replay buffer...")
-            self.replay_buffer.add_examples(examples)
-            self.total_games += self.config.games_per_iteration
-            print(f"  Replay buffer size: {len(self.replay_buffer)} examples")
+            if should_generate:
+                print(f"\n[1/3] Generating {self.config.games_per_iteration} self-play games...")
+                self_play_manager = SelfPlayManager(self.network, self.config)
+                examples = self_play_manager.generate_games(self.config.games_per_iteration)
+
+                # Step 2: Add to replay buffer
+                print(f"\n[2/3] Adding {len(examples)} examples to replay buffer...")
+                self.replay_buffer.add_examples(examples)
+                self.total_games += self.config.games_per_iteration
+                print(f"  Replay buffer size: {len(self.replay_buffer)} examples")
+            else:
+                print(f"\n[1/3] Skipping game generation (frequency={self.config.generation_frequency})")
+                print(f"      Training on existing replay buffer ({len(self.replay_buffer)} examples)")
+                print(f"\n[2/3] Replay buffer unchanged")
 
             # Step 3: Train network
             print(f"\n[3/3] Training network for {self.config.epochs_per_iteration} epochs...")

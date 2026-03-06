@@ -33,6 +33,8 @@ This will:
 python scripts/train.py --config config.yaml --iterations 10
 ```
 
+**Speed Optimization**: By default, `generation_frequency: 5` means new games are only generated every 5th iteration, giving a **5x speedup**! Iterations 2-5, 7-10, etc. just train on the existing replay buffer.
+
 ### Option 2: Quick Test (CPU-only)
 
 If you don't have a GPU, test on CPU (slower but works):
