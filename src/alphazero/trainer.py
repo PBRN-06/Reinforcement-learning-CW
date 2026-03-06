@@ -13,6 +13,13 @@ from src.alphazero.self_play import SelfPlayManager
 from src.data.replay_buffer import ReplayBuffer
 from src.alphazero.utils import encode_board_state
 
+# Try to import tqdm for progress bars
+try:
+    from tqdm import tqdm
+    TQDM_AVAILABLE = True
+except ImportError:
+    TQDM_AVAILABLE = False
+
 
 class AlphaZeroTrainer:
     """Orchestrates the AlphaZero training process."""
@@ -123,6 +130,10 @@ class AlphaZeroTrainer:
                 shuffle=True
             )
 
+            # Wrap with tqdm if available
+            if TQDM_AVAILABLE:
+                data_loader = tqdm(data_loader, desc=f"  Epoch {epoch+1}/{self.config.epochs_per_iteration}", leave=False)
+
             for batch in data_loader:
                 states, policies, outcomes = batch
 
@@ -157,6 +168,14 @@ class AlphaZeroTrainer:
                 total_value_loss += value_loss.item()
                 total_loss += loss.item()
                 num_batches += 1
+
+                # Update progress bar with loss
+                if TQDM_AVAILABLE and hasattr(data_loader, 'set_postfix'):
+                    data_loader.set_postfix({
+                        'loss': f'{loss.item():.4f}',
+                        'p_loss': f'{policy_loss.item():.4f}',
+                        'v_loss': f'{value_loss.item():.4f}'
+                    })
 
         # Average metrics
         return {
@@ -240,7 +259,7 @@ class AlphaZeroTrainer:
             path: Path to checkpoint file
         """
         print(f"\nLoading checkpoint: {path}")
-        checkpoint = torch.load(path, map_location=self.device)
+        checkpoint = torch.load(path, map_location=self.device, weights_only=False)
 
         self.network.load_state_dict(checkpoint['model_state_dict'])
         self.optimizer.load_state_dict(checkpoint['optimizer_state_dict'])

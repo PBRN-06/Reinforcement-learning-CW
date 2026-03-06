@@ -11,6 +11,13 @@ from src.alphazero.utils import (
     get_legal_moves, apply_action
 )
 
+# Try to import tqdm for progress bars
+try:
+    from tqdm import tqdm
+    TQDM_AVAILABLE = True
+except ImportError:
+    TQDM_AVAILABLE = False
+
 
 class SelfPlayWorker:
     """Worker for generating self-play games."""
@@ -154,27 +161,41 @@ class SelfPlayManager:
         # TODO: Add multiprocessing support for parallel generation
         worker = SelfPlayWorker(self.network, self.config)
 
-        # Detect if running in Jupyter/Colab (where \r doesn't work well)
-        try:
-            from IPython import get_ipython
-            in_notebook = get_ipython() is not None
-        except:
-            in_notebook = False
+        # Use tqdm if available, otherwise fall back to basic logging
+        if TQDM_AVAILABLE:
+            # Use tqdm progress bar (works great in notebooks and terminals)
+            pbar = tqdm(range(num_games), desc="  Self-play", unit="game")
+            for game_idx in pbar:
+                examples = worker.play_game()
+                all_examples.extend(examples)
+                pbar.set_postfix({"examples": len(all_examples)})
+            pbar.close()
+        else:
+            # Fallback: Detect if running in Jupyter/Colab
+            try:
+                from IPython import get_ipython
+                in_notebook = get_ipython() is not None
+            except:
+                in_notebook = False
 
-        for game_idx in range(num_games):
-            if in_notebook:
-                # Print every 10 games for notebook compatibility
-                if (game_idx + 1) % 10 == 0 or (game_idx + 1) == num_games:
-                    print(f"  Generating game {game_idx + 1}/{num_games}...")
-            else:
-                # Terminal: overwrite same line
-                print(f"  Generating game {game_idx + 1}/{num_games}...", end='\r')
+            import sys
 
-            examples = worker.play_game()
-            all_examples.extend(examples)
+            for game_idx in range(num_games):
+                if in_notebook:
+                    # Print every 10 games for notebook compatibility
+                    if (game_idx + 1) % 10 == 0 or (game_idx + 1) == num_games:
+                        print(f"  Generating game {game_idx + 1}/{num_games}...", flush=True)
+                        sys.stdout.flush()  # Force immediate output
+                else:
+                    # Terminal: overwrite same line
+                    print(f"  Generating game {game_idx + 1}/{num_games}...", end='\r')
 
-        if not in_notebook:
-            print()  # Newline after \r progress
-        print(f"  Generated {num_games} games ({len(all_examples)} examples)")
+                examples = worker.play_game()
+                all_examples.extend(examples)
+
+            if not in_notebook:
+                print()  # Newline after \r progress
+
+        print(f"  Generated {num_games} games ({len(all_examples)} examples)", flush=True)
 
         return all_examples
