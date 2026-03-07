@@ -178,15 +178,18 @@ class SelfPlayWorker:
 
             # Add shaped reward if enabled (provides dense intermediate feedback)
             if self.config.reward_shaping_weight > 0:
-                # Calculate reward based on sequences (2→10, 3→100, 4→1000, 5→10000)
+                # Calculate reward based on sequences (2→1, 3→5, 4→50)
+                # Opponent penalties are asymmetric: (2→-3, 3→-10, 4→-80)
                 shaped_reward = calculate_reward(
                     example['state'],
                     player=1,  # Already in canonical form (player is always 1)
                     board_size=self.board_size
                 )
-                # Normalize to [-1, 1] range: typical mid-game ~500, max ~10000
-                # Using tanh for safe saturation at extreme values
-                normalized_shaped = np.tanh(shaped_reward / 5000.0)
+                # Normalize to [-1, 1] range using tanh
+                # Typical mid-game: ~5-20 → normalized 0.05-0.20
+                # Strong position: ~50 → normalized ~0.46
+                # Opponent threat: ~-80 → normalized ~-0.66
+                normalized_shaped = np.tanh(shaped_reward / 100.0)
 
                 # Combine: base outcome (dominant) + shaped component (guidance)
                 example['outcome'] = base_outcome + self.config.reward_shaping_weight * normalized_shaped

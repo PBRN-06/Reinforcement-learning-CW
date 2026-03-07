@@ -24,7 +24,7 @@ batch_size: 256           # Training batch size (adjust for GPU memory)
 learning_rate: 0.0002     # Adam learning rate
 weight_decay: 0.0001      # L2 regularization
 grad_clip: 5.0            # Gradient clipping norm
-reward_shaping_weight: 0.001  # Weight for shaped rewards (0.0=disabled)
+reward_shaping_weight: 0.1  # Weight for shaped rewards (0.0=disabled)
 
 # Replay Buffer
 replay_buffer_size: 500000  # Maximum examples to keep in buffer

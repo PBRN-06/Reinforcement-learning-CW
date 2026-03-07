@@ -24,19 +24,19 @@ def calculate_reward(board : np.ndarray, player, board_size=None):
   # Reward weights for different sequence lengths
   weights = {
     # Lenth : Reward
-    2:        10,
-    3:        100,
-    4:        1000,
-    5:        10000
+    2:        1,
+    3:        5,
+    4:        50,
+    5:        0 # Used purely for detection - value is encoded in standard alpha-zero
   }
 
   # Penalty weights for opponent sequences (negative)
   penalty_weights = {
     # Lenth : Reward
-    2:        -10,
-    3:        -100,
-    4:        -1000,
-    5:        -10000
+    2:        -3,
+    3:        -10,
+    4:        -80,
+    5:        0
   }
 
   total_reward = 0
