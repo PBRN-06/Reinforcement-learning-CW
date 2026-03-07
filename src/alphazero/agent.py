@@ -11,6 +11,7 @@ from src.agent import Agent
 from src.board import Board
 from src.alphazero.network import AlphaZeroNetwork
 from src.alphazero.mcts import MCTS
+from src.alphazero.mcts_batched import BatchedMCTS
 from src.alphazero.utils import get_canonical_board
 
 
@@ -23,7 +24,7 @@ class AlphaZeroAgent(Agent):
 
     def __init__(self, checkpoint_path: str = None, num_simulations: int = 400,
                  temperature: float = 0.0, num_res_blocks: int = 6,
-                 num_filters: int = 64, board_size: int = 9):
+                 num_filters: int = 64, board_size: int = 9, batch_size: int = 16):
         """
         Initialize AlphaZero agent.
 
@@ -34,6 +35,7 @@ class AlphaZeroAgent(Agent):
             num_res_blocks: Number of residual blocks in network
             num_filters: Number of filters in network
             board_size: Size of game board
+            batch_size: MCTS batch size for GPU optimization (default: 16, use 1 to disable)
         """
         super().__init__()
 
@@ -55,11 +57,25 @@ class AlphaZeroAgent(Agent):
         # Set to eval mode
         self.network.eval()
 
-        # Create MCTS
-        self.mcts = MCTS(
-            self.network,
-            num_simulations=num_simulations
-        )
+        # Create MCTS (batched for speed if batch_size > 1)
+        if batch_size > 1:
+            self.mcts = BatchedMCTS(
+                self.network,
+                num_simulations=num_simulations,
+                batch_size=batch_size,
+                c_puct=1.5,
+                dirichlet_alpha=0.3,
+                dirichlet_epsilon=0.25
+            )
+        else:
+            # Sequential MCTS (slower but simpler)
+            self.mcts = MCTS(
+                self.network,
+                num_simulations=num_simulations,
+                c_puct=1.5,
+                dirichlet_alpha=0.3,
+                dirichlet_epsilon=0.25
+            )
 
     def command(self, board: Board, reward) -> tuple[int, int]:
         """

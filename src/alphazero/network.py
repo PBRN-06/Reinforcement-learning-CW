@@ -156,6 +156,63 @@ class AlphaZeroNetwork(nn.Module):
 
         return policy_probs, float(value_scalar)
 
+    @torch.no_grad()
+    def predict_batch(self, board_states: list):
+        """
+        Batched inference for multiple states (for parallel MCTS).
+
+        Args:
+            board_states: List of (board_size, board_size) numpy arrays
+
+        Returns:
+            policy_probs_batch: List of (num_actions,) numpy arrays
+            values_batch: List of floats in [-1, 1]
+        """
+        self.eval()
+
+        if len(board_states) == 0:
+            return [], []
+
+        # Encode all board states
+        encoded_states = []
+        valid_masks = []
+
+        for board_state in board_states:
+            encoded = encode_board_state(board_state, self.board_size)
+            encoded_states.append(encoded)
+            valid_masks.append(create_valid_move_mask(board_state))
+
+        # Stack into batch tensor
+        state_tensor = torch.FloatTensor(np.stack(encoded_states, axis=0))
+
+        # Move to device
+        device = next(self.parameters()).device
+        state_tensor = state_tensor.to(device)
+
+        # Forward pass (batched)
+        policy_logits, values = self.forward(state_tensor)
+
+        # Move to CPU for processing
+        policy_logits = policy_logits.cpu().numpy()
+        values = values.cpu().numpy()
+
+        # Apply masks and compute probabilities for each state
+        policy_probs_batch = []
+        values_batch = []
+
+        for i in range(len(board_states)):
+            # Apply valid move mask
+            masked_logits = policy_logits[i] - (1 - valid_masks[i]) * 1e9
+
+            # Softmax to get probabilities
+            policy_probs = self._softmax(masked_logits)
+            policy_probs_batch.append(policy_probs)
+
+            # Extract value
+            values_batch.append(float(values[i, 0]))
+
+        return policy_probs_batch, values_batch
+
     def _softmax(self, x: np.ndarray) -> np.ndarray:
         """Numerically stable softmax."""
         x_max = np.max(x)

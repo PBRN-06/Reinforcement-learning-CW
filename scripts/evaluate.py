@@ -90,6 +90,8 @@ def main():
                         help='MCTS simulations per move (default: 400)')
     parser.add_argument('--temperature', type=float, default=0.0,
                         help='Temperature for action selection (default: 0.0)')
+    parser.add_argument('--batch-size', type=int, default=16,
+                        help='MCTS batch size for GPU optimization (default: 16, use 1 to disable)')
     parser.add_argument('--verbose', action='store_true',
                         help='Print detailed game information')
     args = parser.parse_args()
@@ -106,7 +108,8 @@ def main():
         agent1 = AlphaZeroAgent(
             checkpoint_path=args.agent1,
             num_simulations=args.simulations,
-            temperature=args.temperature
+            temperature=args.temperature,
+            batch_size=args.batch_size
         )
         agent1_name = f"AlphaZero({os.path.basename(args.agent1)})"
 
@@ -117,7 +120,8 @@ def main():
         agent2 = AlphaZeroAgent(
             checkpoint_path=args.agent2,
             num_simulations=args.simulations,
-            temperature=args.temperature
+            temperature=args.temperature,
+            batch_size=args.batch_size
         )
         agent2_name = f"AlphaZero({os.path.basename(args.agent2)})"
 

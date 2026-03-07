@@ -5,6 +5,7 @@ Main training loop that coordinates self-play, network updates, and checkpointin
 """
 
 import os
+import json
 import torch
 import torch.nn.functional as F
 import numpy as np
@@ -62,6 +63,34 @@ class AlphaZeroTrainer:
         os.makedirs(config.checkpoint_dir, exist_ok=True)
         os.makedirs(config.log_dir, exist_ok=True)
 
+        # Training metrics log
+        self.metrics_log_path = os.path.join(config.log_dir, "training_metrics.json")
+        self.metrics_history = []
+
+    def _get_random_moves_count(self, iteration: int) -> int:
+        """
+        Calculate number of random opening moves based on training iteration.
+        Implements adaptive decay schedule for faster early training.
+
+        Args:
+            iteration: Current training iteration
+
+        Returns:
+            Number of random moves to use at game start
+        """
+        max_random = self.config.random_opening_moves
+        max_iterations = self.config.num_iterations
+
+        # Adaptive schedule: decay random moves as training progresses
+        if iteration <= max_iterations * 0.3:  # First 30% of training
+            return max_random
+        elif iteration <= max_iterations * 0.6:  # Next 30% (30-60%)
+            return max(max_random // 2, 0)
+        elif iteration <= max_iterations * 0.8:  # Next 20% (60-80%)
+            return max(max_random // 5, 0)
+        else:  # Final 20%
+            return 0
+
     def train(self):
         """Main training loop."""
         print(f"\n{'=' * 60}")
@@ -69,6 +98,13 @@ class AlphaZeroTrainer:
         print(f"Device: {self.device}")
         print(f"Network: {self.config.num_res_blocks} ResBlocks, {self.config.num_filters} filters")
         print(f"MCTS: {self.config.num_simulations} simulations per move")
+
+        # Show MCTS batching info
+        if hasattr(self.config, 'mcts_batch_size') and self.config.mcts_batch_size > 1:
+            print(f"MCTS Batching: Enabled (batch_size={self.config.mcts_batch_size}) - GPU optimized")
+        else:
+            print(f"MCTS Batching: Disabled (sequential evaluation)")
+
         print(f"Generation: Every {self.config.generation_frequency} iteration(s)")
         print(f"{'=' * 60}\n")
 
@@ -83,9 +119,20 @@ class AlphaZeroTrainer:
             should_generate = (self.iteration % self.config.generation_frequency == 1) or (self.iteration == 1)
 
             if should_generate:
-                print(f"\n[1/3] Generating {self.config.games_per_iteration} self-play games...")
+                # Calculate random opening moves for this iteration
+                num_random_moves = self._get_random_moves_count(self.iteration)
+                if num_random_moves > 0:
+                    print(f"\n[1/3] Generating {self.config.games_per_iteration} self-play games...")
+                    print(f"      Using {num_random_moves} random opening moves for speedup")
+                else:
+                    print(f"\n[1/3] Generating {self.config.games_per_iteration} self-play games...")
+                    print(f"      Using full MCTS from move 1 (no random openings)")
+
                 self_play_manager = SelfPlayManager(self.network, self.config)
-                examples = self_play_manager.generate_games(self.config.games_per_iteration)
+                examples = self_play_manager.generate_games(
+                    self.config.games_per_iteration,
+                    current_iteration=self.iteration
+                )
 
                 # Step 2: Add to replay buffer
                 print(f"\n[2/3] Adding {len(examples)} examples to replay buffer...")
@@ -109,7 +156,10 @@ class AlphaZeroTrainer:
             print(f"  Total loss: {train_metrics['total_loss']:.4f}")
             print(f"{'=' * 60}")
 
-            # Step 4: Save checkpoint
+            # Step 4: Log metrics
+            self._log_metrics(train_metrics)
+
+            # Step 5: Save checkpoint
             if self.iteration % self.config.checkpoint_freq == 0:
                 self.save_checkpoint()
 
@@ -242,6 +292,27 @@ class AlphaZeroTrainer:
 
         return encoded
 
+    def _log_metrics(self, train_metrics):
+        """
+        Log training metrics to JSON file.
+
+        Args:
+            train_metrics: Dict with policy_loss, value_loss, total_loss
+        """
+        metrics_entry = {
+            'iteration': self.iteration,
+            'total_games': self.total_games,
+            'policy_loss': train_metrics['policy_loss'],
+            'value_loss': train_metrics['value_loss'],
+            'total_loss': train_metrics['total_loss']
+        }
+
+        self.metrics_history.append(metrics_entry)
+
+        # Save to JSON file (overwrite each time)
+        with open(self.metrics_log_path, 'w') as f:
+            json.dump(self.metrics_history, f, indent=2)
+
     def save_checkpoint(self):
         """Save training checkpoint."""
         checkpoint_path = os.path.join(
@@ -273,6 +344,12 @@ class AlphaZeroTrainer:
         self.optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
         self.iteration = checkpoint['iteration']
         self.total_games = checkpoint['total_games']
+
+        # Load existing metrics history if available
+        if os.path.exists(self.metrics_log_path):
+            with open(self.metrics_log_path, 'r') as f:
+                self.metrics_history = json.load(f)
+            print(f"  Loaded {len(self.metrics_history)} metric entries from log")
 
         print(f"  Resumed from iteration {self.iteration}")
         print(f"  Total games played: {self.total_games}")

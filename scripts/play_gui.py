@@ -32,6 +32,8 @@ def main():
                         help='MCTS simulations per move (default: 400)')
     parser.add_argument('--temperature', type=float, default=0.0,
                         help='Temperature for AI moves (default: 0.0 = deterministic)')
+    parser.add_argument('--batch-size', type=int, default=16,
+                        help='MCTS batch size for GPU optimization (default: 16, use 1 to disable)')
     parser.add_argument('--human-first', action='store_true',
                         help='Human plays first (default: AI plays first)')
     args = parser.parse_args()
@@ -49,7 +51,8 @@ def main():
     alphazero = AlphaZeroAgent(
         checkpoint_path=args.checkpoint,
         num_simulations=args.simulations,
-        temperature=args.temperature
+        temperature=args.temperature,
+        batch_size=args.batch_size
     )
 
     # Setup players

@@ -19,6 +19,7 @@ class AlphaZeroConfig:
 
     # MCTS parameters
     num_simulations: int = 400
+    mcts_batch_size: int = 16  # Batch size for parallel MCTS evaluation (GPU optimization)
     c_puct: float = 1.5
     dirichlet_alpha: float = 0.3
     dirichlet_epsilon: float = 0.25
@@ -28,6 +29,7 @@ class AlphaZeroConfig:
     games_per_iteration: int = 100
     num_workers: int = 4
     generation_frequency: int = 1  # Generate new games every N iterations (1=every iteration, 5=every 5th)
+    random_opening_moves: int = 10  # Number of random moves at game start (adaptive decay based on iteration)
 
     # Training
     num_iterations: int = 1000
@@ -75,6 +77,8 @@ class AlphaZeroConfig:
         assert self.num_res_blocks >= 1, "Need at least 1 residual block"
         assert self.num_filters >= 16, "Need at least 16 filters"
         assert self.num_simulations >= 1, "Need at least 1 MCTS simulation"
+        assert self.mcts_batch_size >= 1, "MCTS batch size must be positive"
+        assert self.mcts_batch_size <= self.num_simulations, "MCTS batch size cannot exceed num_simulations"
         assert self.batch_size >= 1, "Batch size must be positive"
         assert self.learning_rate > 0, "Learning rate must be positive"
         assert 0 < self.dirichlet_epsilon < 1, "Dirichlet epsilon must be in (0, 1)"

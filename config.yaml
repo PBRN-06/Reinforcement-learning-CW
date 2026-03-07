@@ -7,6 +7,7 @@ num_filters: 64          # 64-128 filters
 # MCTS Parameters
 num_simulations: 400     # 200-800 (more = stronger but slower)
 c_puct: 1.5              # Exploration constant for UCB
+mcts_batch_size: 32
 dirichlet_alpha: 0.3     # Noise concentration (scaled for 9x9 board)
 dirichlet_epsilon: 0.25  # Noise mixing ratio (75% network, 25% noise)
 temperature_threshold: 15 # Move number to switch from exploration to exploitation

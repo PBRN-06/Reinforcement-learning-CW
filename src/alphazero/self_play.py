@@ -6,6 +6,7 @@ Generates games via self-play using MCTS for training the neural network.
 
 import numpy as np
 from src.alphazero.mcts import MCTS
+from src.alphazero.mcts_batched import BatchedMCTS
 from src.alphazero.utils import (
     get_canonical_board, check_terminal, augment_example,
     get_legal_moves, apply_action
@@ -32,18 +33,61 @@ class SelfPlayWorker:
         """
         self.network = network
         self.config = config
-        self.mcts = MCTS(
-            network,
-            num_simulations=config.num_simulations,
-            c_puct=config.c_puct,
-            dirichlet_alpha=config.dirichlet_alpha,
-            dirichlet_epsilon=config.dirichlet_epsilon
-        )
+
+        # Use batched MCTS for GPU efficiency (root parallelization)
+        if hasattr(config, 'mcts_batch_size') and config.mcts_batch_size > 1:
+            self.mcts = BatchedMCTS(
+                network,
+                num_simulations=config.num_simulations,
+                batch_size=config.mcts_batch_size,
+                c_puct=config.c_puct,
+                dirichlet_alpha=config.dirichlet_alpha,
+                dirichlet_epsilon=config.dirichlet_epsilon
+            )
+            self.using_batched_mcts = True
+        else:
+            # Fallback to standard MCTS
+            self.mcts = MCTS(
+                network,
+                num_simulations=config.num_simulations,
+                c_puct=config.c_puct,
+                dirichlet_alpha=config.dirichlet_alpha,
+                dirichlet_epsilon=config.dirichlet_epsilon
+            )
+            self.using_batched_mcts = False
+
         self.board_size = config.board_size
 
-    def play_game(self):
+    def _get_random_moves_count(self, iteration: int) -> int:
+        """
+        Calculate number of random opening moves based on training iteration.
+        Implements adaptive decay schedule for faster early training.
+
+        Args:
+            iteration: Current training iteration
+
+        Returns:
+            Number of random moves to use at game start
+        """
+        max_random = self.config.random_opening_moves
+        max_iterations = self.config.num_iterations
+
+        # Adaptive schedule: decay random moves as training progresses
+        if iteration <= max_iterations * 0.3:  # First 30% of training
+            return max_random
+        elif iteration <= max_iterations * 0.6:  # Next 30% (30-60%)
+            return max(max_random // 2, 0)
+        elif iteration <= max_iterations * 0.8:  # Next 20% (60-80%)
+            return max(max_random // 5, 0)
+        else:  # Final 20%
+            return 0
+
+    def play_game(self, current_iteration: int = 1):
         """
         Play one complete game and return training examples.
+
+        Args:
+            current_iteration: Current training iteration (for adaptive random moves)
 
         Returns:
             List of training examples with augmentation
@@ -55,44 +99,56 @@ class SelfPlayWorker:
         move_count = 0
         max_moves = self.board_size * self.board_size
 
+        # Determine number of random opening moves (for speedup)
+        num_random_moves = self._get_random_moves_count(current_iteration)
+
         while move_count < max_moves:
-            # Get canonical board (current player always sees themselves as 1)
-            canonical_board = get_canonical_board(board, current_player)
-
-            # Determine temperature (high early for exploration, low late for exploitation)
-            if move_count < self.config.temperature_threshold:
-                temperature = 1.0
-            else:
-                temperature = 0.1
-
-            # Run MCTS with Dirichlet noise for exploration
-            mcts_policy, _ = self.mcts.search(
-                canonical_board,
-                current_player=1,  # Always 1 in canonical form
-                add_noise=True,
-                temperature=temperature
-            )
-
-            # Store training example (before making move)
-            examples.append({
-                'state': canonical_board.copy(),
-                'policy': mcts_policy.copy(),
-                'player': current_player
-            })
-
-            # Sample action from MCTS policy
-            legal_moves = get_legal_moves(board)
-            if len(legal_moves) == 0:
-                break  # Board full (draw)
-
-            # Normalize policy over legal moves only
-            legal_policy = mcts_policy[legal_moves]
-            if np.sum(legal_policy) > 0:
-                legal_policy = legal_policy / np.sum(legal_policy)
-                action = np.random.choice(legal_moves, p=legal_policy)
-            else:
-                # Fallback to uniform random
+            # Check if we're in random opening phase
+            if move_count < num_random_moves:
+                # Random opening move (no MCTS, no training data)
+                legal_moves = get_legal_moves(board)
+                if len(legal_moves) == 0:
+                    break  # Board full (draw)
                 action = np.random.choice(legal_moves)
+            else:
+                # Normal MCTS-guided move
+                # Get canonical board (current player always sees themselves as 1)
+                canonical_board = get_canonical_board(board, current_player)
+
+                # Determine temperature (high early for exploration, low late for exploitation)
+                if move_count < self.config.temperature_threshold:
+                    temperature = 1.0
+                else:
+                    temperature = 0.1
+
+                # Run MCTS with Dirichlet noise for exploration
+                mcts_policy, _ = self.mcts.search(
+                    canonical_board,
+                    current_player=1,  # Always 1 in canonical form
+                    add_noise=True,
+                    temperature=temperature
+                )
+
+                # Store training example (before making move)
+                examples.append({
+                    'state': canonical_board.copy(),
+                    'policy': mcts_policy.copy(),
+                    'player': current_player
+                })
+
+                # Sample action from MCTS policy
+                legal_moves = get_legal_moves(board)
+                if len(legal_moves) == 0:
+                    break  # Board full (draw)
+
+                # Normalize policy over legal moves only
+                legal_policy = mcts_policy[legal_moves]
+                if np.sum(legal_policy) > 0:
+                    legal_policy = legal_policy / np.sum(legal_policy)
+                    action = np.random.choice(legal_moves, p=legal_policy)
+                else:
+                    # Fallback to uniform random
+                    action = np.random.choice(legal_moves)
 
             # Apply action
             board = apply_action(board, action, current_player)
@@ -145,12 +201,13 @@ class SelfPlayManager:
         self.network = network
         self.config = config
 
-    def generate_games(self, num_games: int):
+    def generate_games(self, num_games: int, current_iteration: int = 1):
         """
         Generate games sequentially (or in parallel with multiprocessing).
 
         Args:
             num_games: Number of games to generate
+            current_iteration: Current training iteration (for adaptive random moves)
 
         Returns:
             List of all training examples from all games
@@ -166,7 +223,7 @@ class SelfPlayManager:
             # Use tqdm progress bar (works great in notebooks and terminals)
             pbar = tqdm(range(num_games), desc="  Self-play", unit="game")
             for game_idx in pbar:
-                examples = worker.play_game()
+                examples = worker.play_game(current_iteration)
                 all_examples.extend(examples)
                 pbar.set_postfix({"examples": len(all_examples)})
             pbar.close()
@@ -190,7 +247,7 @@ class SelfPlayManager:
                     # Terminal: overwrite same line
                     print(f"  Generating game {game_idx + 1}/{num_games}...", end='\r')
 
-                examples = worker.play_game()
+                examples = worker.play_game(current_iteration)
                 all_examples.extend(examples)
 
             if not in_notebook:
