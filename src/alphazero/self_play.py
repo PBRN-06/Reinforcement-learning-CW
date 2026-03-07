@@ -11,6 +11,7 @@ from src.alphazero.utils import (
     get_canonical_board, check_terminal, augment_example,
     get_legal_moves, apply_action
 )
+from src.rewards import calculate_reward
 
 # Try to import tqdm for progress bars
 try:
@@ -167,12 +168,31 @@ class SelfPlayWorker:
 
         # Assign outcomes to all examples
         for example in examples:
+            # Base terminal outcome (win/loss/draw)
             if winner == 0:  # Draw
-                example['outcome'] = 0.0
+                base_outcome = 0.0
             elif winner == example['player']:  # Win
-                example['outcome'] = 1.0
+                base_outcome = 1.0
             else:  # Loss
-                example['outcome'] = -1.0
+                base_outcome = -1.0
+
+            # Add shaped reward if enabled (provides dense intermediate feedback)
+            if self.config.reward_shaping_weight > 0:
+                # Calculate reward based on sequences (2→10, 3→100, 4→1000, 5→10000)
+                shaped_reward = calculate_reward(
+                    example['state'],
+                    player=1,  # Already in canonical form (player is always 1)
+                    board_size=self.board_size
+                )
+                # Normalize to [-1, 1] range: typical mid-game ~500, max ~10000
+                # Using tanh for safe saturation at extreme values
+                normalized_shaped = np.tanh(shaped_reward / 5000.0)
+
+                # Combine: base outcome (dominant) + shaped component (guidance)
+                example['outcome'] = base_outcome + self.config.reward_shaping_weight * normalized_shaped
+            else:
+                # No reward shaping (original AlphaZero behavior)
+                example['outcome'] = base_outcome
 
         # Apply data augmentation (8-fold symmetry)
         augmented_examples = []

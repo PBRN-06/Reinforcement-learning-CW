@@ -38,6 +38,7 @@ class AlphaZeroConfig:
     learning_rate: float = 1e-3
     weight_decay: float = 1e-4
     grad_clip: float = 5.0
+    reward_shaping_weight: float = 0.0  # Weight for intermediate reward shaping (0.0=disabled, 0.1=recommended)
 
     # Replay buffer
     replay_buffer_size: int = 500000
