@@ -509,5 +509,3 @@ done
 - [AlphaZero Paper](https://arxiv.org/abs/1712.01815)
 
 ---
-
-**Happy Training!** 🎮🤖

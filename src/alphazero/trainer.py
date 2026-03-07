@@ -52,6 +52,15 @@ class AlphaZeroTrainer:
             weight_decay=config.weight_decay
         )
 
+        # Create learning rate scheduler (reduces LR when loss plateaus)
+        self.scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
+            self.optimizer,
+            mode='min',           # Minimize loss
+            factor=0.5,           # Reduce LR by 50% when triggered
+            patience=10,          # Wait 10 iterations before reducing
+            min_lr=1e-6          # Don't go below this LR
+        )
+
         # Create replay buffer
         self.replay_buffer = ReplayBuffer(max_size=config.replay_buffer_size)
 
@@ -108,7 +117,9 @@ class AlphaZeroTrainer:
         print(f"Generation: Every {self.config.generation_frequency} iteration(s)")
         print(f"{'=' * 60}\n")
 
-        for iteration in range(self.config.num_iterations):
+        # Start from current iteration (supports resuming from checkpoint)
+        start_iteration = self.iteration
+        for iteration in range(start_iteration, self.config.num_iterations):
             self.iteration = iteration + 1
 
             print(f"\n{'=' * 60}")
@@ -116,7 +127,9 @@ class AlphaZeroTrainer:
             print(f"{'=' * 60}")
 
             # Step 1: Self-play (conditional based on generation_frequency)
-            should_generate = (self.iteration % self.config.generation_frequency == 1) or (self.iteration == 1)
+            # Always generate if buffer is empty (e.g., after resuming from checkpoint)
+            should_generate = (((self.config.generation_frequency == 1) or (self.iteration % self.config.generation_frequency == 1)) or (self.iteration == 1) 
+                               or self.replay_buffer.is_empty())
 
             if should_generate:
                 # Calculate random opening moves for this iteration
@@ -147,6 +160,9 @@ class AlphaZeroTrainer:
             # Step 3: Train network
             print(f"\n[3/3] Training network for {self.config.epochs_per_iteration} epochs...")
             train_metrics = self.train_network()
+
+            # Step 3.5: Update learning rate scheduler based on loss
+            self.scheduler.step(train_metrics['total_loss'])
 
             print(f"\n{'=' * 60}")
             print(f"Iteration {self.iteration} Summary:")
@@ -207,7 +223,9 @@ class AlphaZeroTrainer:
                 # Compute losses
                 policy_loss = self._policy_loss(policy_logits, policy_targets)
                 value_loss = self._value_loss(value_pred, value_targets)
-                loss = policy_loss + value_loss
+                # Weight value loss to balance gradient magnitudes (policy ~2.8, value ~0.08)
+                # This ensures value head gets sufficient gradient signal
+                loss = policy_loss + 0.5 * value_loss
 
                 # Backward pass
                 self.optimizer.zero_grad()
@@ -324,6 +342,7 @@ class AlphaZeroTrainer:
             'iteration': self.iteration,
             'model_state_dict': self.network.state_dict(),
             'optimizer_state_dict': self.optimizer.state_dict(),
+            'scheduler_state_dict': self.scheduler.state_dict(),
             'total_games': self.total_games,
             'config': self.config
         }, checkpoint_path)
@@ -345,11 +364,27 @@ class AlphaZeroTrainer:
         self.iteration = checkpoint['iteration']
         self.total_games = checkpoint['total_games']
 
+        # Load scheduler state if available (backward compatibility)
+        if 'scheduler_state_dict' in checkpoint:
+            self.scheduler.load_state_dict(checkpoint['scheduler_state_dict'])
+            print(f"  Loaded scheduler state")
+        else:
+            print(f"  No scheduler state in checkpoint (old checkpoint format)")
+
         # Load existing metrics history if available
         if os.path.exists(self.metrics_log_path):
             with open(self.metrics_log_path, 'r') as f:
                 self.metrics_history = json.load(f)
             print(f"  Loaded {len(self.metrics_history)} metric entries from log")
+
+            # Remove any metrics after the resumed checkpoint to avoid duplicates
+            self.metrics_history = [m for m in self.metrics_history if m['iteration'] <= self.iteration]
+            print(f"  Keeping {len(self.metrics_history)} metrics up to iteration {self.iteration}")
+
+            # Save filtered metrics immediately to disk
+            with open(self.metrics_log_path, 'w') as f:
+                json.dump(self.metrics_history, f, indent=2)
+            print(f"  Saved cleaned metrics to {self.metrics_log_path}")
 
         print(f"  Resumed from iteration {self.iteration}")
         print(f"  Total games played: {self.total_games}")

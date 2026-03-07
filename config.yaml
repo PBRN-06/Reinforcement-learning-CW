@@ -1,7 +1,7 @@
 # AlphaZero Configuration for Gomoku (9x9, 5-in-a-row)
 
 # Network Architecture
-num_res_blocks: 6        # 4-6 recommended for 9x9 board
+num_res_blocks: 10
 num_filters: 64          # 64-128 filters
 
 # MCTS Parameters
@@ -15,13 +15,13 @@ temperature_threshold: 15 # Move number to switch from exploration to exploitati
 # Self-Play
 games_per_iteration: 100  # Games to generate per training iteration
 num_workers: 4            # Parallel workers for self-play generation
-generation_frequency: 5   # Generate new games every N iterations (5 = 5x speedup!)
+generation_frequency: 1   # Generate new games every N iterations (1 = fresh data every iteration, prevents stale distribution)
 
 # Training
 num_iterations: 500      # Total training iterations
-epochs_per_iteration: 10  # Training epochs per iteration
+epochs_per_iteration: 2   # Training epochs per iteration (reduced from 10 to prevent replay buffer overfitting)
 batch_size: 256           # Training batch size (adjust for GPU memory)
-learning_rate: 0.001      # Adam learning rate
+learning_rate: 0.0002     # Adam learning rate
 weight_decay: 0.0001      # L2 regularization
 grad_clip: 5.0            # Gradient clipping norm
 
