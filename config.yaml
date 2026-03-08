@@ -8,14 +8,17 @@ num_filters: 64          # 64-128 filters
 num_simulations: 400     # 200-800 (more = stronger but slower)
 c_puct: 1.5              # Exploration constant for UCB
 mcts_batch_size: 32
-dirichlet_alpha: 0.3     # Noise concentration (scaled for 9x9 board)
+dirichlet_alpha: 0.1     # Noise concentration (scaled for 9x9 board)
 dirichlet_epsilon: 0.25  # Noise mixing ratio (75% network, 25% noise)
-temperature_threshold: 15 # Move number to switch from exploration to exploitation
+temperature_threshold: 15 # Move number to switch from high to low temperature
+temperature_high: 1.5    # High temperature for exploration (decays over training)
+temperature_low: 0.1     # Low temperature for exploitation
 
 # Self-Play
 games_per_iteration: 100  # Games to generate per training iteration
 num_workers: 4            # Parallel workers for self-play generation
 generation_frequency: 1   # Generate new games every N iterations (1 = fresh data every iteration, prevents stale distribution)
+past_opponent_ratio: 0.5  # Fraction of games vs past checkpoint (0.5 = half games vs past, prevents self-play collapse)
 
 # Training
 num_iterations: 500       # Total training iterations
@@ -24,7 +27,7 @@ batch_size: 256           # Training batch size (adjust for GPU memory)
 learning_rate: 0.0002     # Adam learning rate
 weight_decay: 0.0001      # L2 regularization
 grad_clip: 5.0            # Gradient clipping norm
-reward_shaping_weight: 0.1  # Weight for shaped rewards (0.0=disabled)
+reward_shaping_weight: 0  # Weight for shaped rewards (0.0=disabled)
 
 # Replay Buffer
 replay_buffer_size: 500000  # Maximum examples to keep in buffer

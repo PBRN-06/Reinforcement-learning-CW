@@ -22,6 +22,7 @@ class MCTSNode:
         self.total_value = 0.0
         self.prior_p = prior_p
         self.mean_value = 0.0
+        self.virtual_loss = 0.0
 
     def expand(self, action_priors: dict):
         """
@@ -35,25 +36,19 @@ class MCTSNode:
                 self.children[action] = MCTSNode(parent=self, prior_p=prior)
 
     def select_child(self, c_puct: float):
-        """
-        Select child with highest UCB score.
-
-        Args:
-            c_puct: Exploration constant
-
-        Returns:
-            (action, child_node) tuple
-        """
         best_score = -float('inf')
         best_action = None
         best_child = None
 
         for action, child in self.children.items():
-            # UCB formula: Q(s,a) + c_puct * P(s,a) * sqrt(N(s)) / (1 + N(s,a))
-            ucb_score = (
-                child.mean_value +
-                c_puct * child.prior_p * math.sqrt(self.visit_count) / (1 + child.visit_count)
+            q_value = -child.mean_value - child.virtual_loss  # fixed penalty per active selection
+
+            exploration = (
+                c_puct * child.prior_p *
+                math.sqrt(self.visit_count) / (1 + child.visit_count)
             )
+
+            ucb_score = q_value + exploration
 
             if ucb_score > best_score:
                 best_score = ucb_score

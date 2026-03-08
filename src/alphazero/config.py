@@ -23,13 +23,16 @@ class AlphaZeroConfig:
     c_puct: float = 1.5
     dirichlet_alpha: float = 0.3
     dirichlet_epsilon: float = 0.25
-    temperature_threshold: int = 15  # Move count to switch temperature
+    temperature_threshold: int = 15  # Move count to switch from high to low temperature
+    temperature_high: float = 1.5  # High temperature for exploration (adaptive decay)
+    temperature_low: float = 0.1  # Low temperature for exploitation
 
     # Self-play
     games_per_iteration: int = 100
     num_workers: int = 4
     generation_frequency: int = 1  # Generate new games every N iterations (1=every iteration, 5=every 5th)
     random_opening_moves: int = 10  # Number of random moves at game start (adaptive decay based on iteration)
+    past_opponent_ratio: float = 0.5  # Fraction of games vs last saved checkpoint (0.5=half games vs past)
 
     # Training
     num_iterations: int = 1000

@@ -5,13 +5,15 @@ Generates games via self-play using MCTS for training the neural network.
 """
 
 import numpy as np
+import torch
 from src.alphazero.mcts import MCTS
 from src.alphazero.mcts_batched import BatchedMCTS
 from src.alphazero.utils import (
     get_canonical_board, check_terminal, augment_example,
-    get_legal_moves, apply_action
+    get_legal_moves, apply_action, find_latest_checkpoint
 )
 from src.rewards import calculate_reward
+from src.alphazero.network import AlphaZeroNetwork
 
 # Try to import tqdm for progress bars
 try:
@@ -24,18 +26,20 @@ except ImportError:
 class SelfPlayWorker:
     """Worker for generating self-play games."""
 
-    def __init__(self, network, config):
+    def __init__(self, network, config, opponent_network=None):
         """
         Initialize self-play worker.
 
         Args:
-            network: Neural network for MCTS
+            network: Neural network for MCTS (current player)
             config: AlphaZeroConfig instance
+            opponent_network: Optional opponent network (for vs past checkpoint games)
         """
         self.network = network
+        self.opponent_network = opponent_network
         self.config = config
 
-        # Use batched MCTS for GPU efficiency (root parallelization)
+        # Create MCTS for main network
         if hasattr(config, 'mcts_batch_size') and config.mcts_batch_size > 1:
             self.mcts = BatchedMCTS(
                 network,
@@ -56,6 +60,28 @@ class SelfPlayWorker:
                 dirichlet_epsilon=config.dirichlet_epsilon
             )
             self.using_batched_mcts = False
+
+        # Create separate MCTS for opponent if provided
+        if opponent_network is not None:
+            if hasattr(config, 'mcts_batch_size') and config.mcts_batch_size > 1:
+                self.opponent_mcts = BatchedMCTS(
+                    opponent_network,
+                    num_simulations=config.num_simulations,
+                    batch_size=config.mcts_batch_size,
+                    c_puct=config.c_puct,
+                    dirichlet_alpha=config.dirichlet_alpha,
+                    dirichlet_epsilon=config.dirichlet_epsilon
+                )
+            else:
+                self.opponent_mcts = MCTS(
+                    opponent_network,
+                    num_simulations=config.num_simulations,
+                    c_puct=config.c_puct,
+                    dirichlet_alpha=config.dirichlet_alpha,
+                    dirichlet_epsilon=config.dirichlet_epsilon
+                )
+        else:
+            self.opponent_mcts = None
 
         self.board_size = config.board_size
 
@@ -82,6 +108,39 @@ class SelfPlayWorker:
             return max(max_random // 5, 0)
         else:  # Final 20%
             return 0
+
+    def _get_temperature(self, move_count: int, iteration: int) -> float:
+        """
+        Calculate temperature for move sampling with adaptive decay.
+        Higher temperature early in training for more exploration.
+
+        Args:
+            move_count: Current move number in the game
+            iteration: Current training iteration
+
+        Returns:
+            Temperature value for move sampling
+        """
+        max_iterations = self.config.num_iterations
+        threshold = self.config.temperature_threshold
+
+        # Get temperature bounds (with decay for high temp)
+        temp_high = self.config.temperature_high if hasattr(self.config, 'temperature_high') else 1.0
+        temp_low = self.config.temperature_low if hasattr(self.config, 'temperature_low') else 0.1
+
+        # Decay high temperature over training (more exploration early)
+        if iteration <= max_iterations * 0.5:  # First half: full exploration
+            high_temp = temp_high
+        elif iteration <= max_iterations * 0.75:  # Third quarter: reduce
+            high_temp = temp_high * 0.7
+        else:  # Final quarter: minimal
+            high_temp = temp_high * 0.5
+
+        # Return temperature based on move count
+        if move_count < threshold:
+            return high_temp  # Exploration phase
+        else:
+            return temp_low  # Exploitation phase
 
     def play_game(self, current_iteration: int = 1):
         """
@@ -116,19 +175,28 @@ class SelfPlayWorker:
                 # Get canonical board (current player always sees themselves as 1)
                 canonical_board = get_canonical_board(board, current_player)
 
-                # Determine temperature (high early for exploration, low late for exploitation)
-                if move_count < self.config.temperature_threshold:
-                    temperature = 1.0
-                else:
-                    temperature = 0.1
+                # Determine temperature with adaptive decay
+                temperature = self._get_temperature(move_count, current_iteration)
 
-                # Run MCTS with Dirichlet noise for exploration
-                mcts_policy, _ = self.mcts.search(
-                    canonical_board,
-                    current_player=1,  # Always 1 in canonical form
-                    add_noise=True,
-                    temperature=temperature
-                )
+                # Choose which MCTS to use based on current player
+                # Player 1 always uses main network
+                # Player 2 uses opponent network if available, otherwise uses main (self-play)
+                if current_player == 2 and self.opponent_mcts is not None:
+                    # Play against past checkpoint
+                    mcts_policy, _ = self.opponent_mcts.search(
+                        canonical_board,
+                        current_player=1,  # Always 1 in canonical form
+                        add_noise=True,
+                        temperature=temperature
+                    )
+                else:
+                    # Self-play or player 1 move
+                    mcts_policy, _ = self.mcts.search(
+                        canonical_board,
+                        current_player=1,  # Always 1 in canonical form
+                        add_noise=True,
+                        temperature=temperature
+                    )
 
                 # Store training example (before making move)
                 examples.append({
@@ -223,6 +291,33 @@ class SelfPlayManager:
         """
         self.network = network
         self.config = config
+        self.opponent_network = None
+        self.opponent_checkpoint_path = None
+
+    def _load_opponent_checkpoint(self, checkpoint_path: str):
+        """
+        Load opponent network from checkpoint.
+
+        Args:
+            checkpoint_path: Path to checkpoint file
+        """
+        print(f"  Loading opponent from: {checkpoint_path}")
+
+        # Create opponent network with same architecture
+        self.opponent_network = AlphaZeroNetwork(
+            num_res_blocks=self.config.num_res_blocks,
+            num_filters=self.config.num_filters,
+            board_size=self.config.board_size
+        )
+
+        # Load checkpoint
+        device = torch.device(self.config.device)
+        checkpoint = torch.load(checkpoint_path, map_location=device, weights_only=False)
+        self.opponent_network.load_state_dict(checkpoint['model_state_dict'])
+        self.opponent_network.to(device)
+        self.opponent_network.eval()  # Set to eval mode
+
+        print(f"  Opponent loaded from iteration {checkpoint.get('iteration', '?')}")
 
     def generate_games(self, num_games: int, current_iteration: int = 1):
         """
@@ -237,15 +332,43 @@ class SelfPlayManager:
         """
         all_examples = []
 
-        # For now, generate sequentially
-        # TODO: Add multiprocessing support for parallel generation
-        worker = SelfPlayWorker(self.network, self.config)
+        # Load opponent network from latest checkpoint if enabled
+        past_opponent_ratio = getattr(self.config, 'past_opponent_ratio', 0.0)
+        if past_opponent_ratio > 0:
+            checkpoint_path = find_latest_checkpoint(self.config.checkpoint_dir, current_iteration)
+            if checkpoint_path and checkpoint_path != self.opponent_checkpoint_path:
+                # Load new opponent checkpoint
+                self._load_opponent_checkpoint(checkpoint_path)
+                self.opponent_checkpoint_path = checkpoint_path
+
+        # Calculate how many games vs past opponent
+        num_vs_past = int(num_games * past_opponent_ratio)
+        num_self_play = num_games - num_vs_past
+
+        # Create workers
+        self_play_worker = SelfPlayWorker(self.network, self.config)
+        if self.opponent_network is not None:
+            vs_past_worker = SelfPlayWorker(self.network, self.config, opponent_network=self.opponent_network)
+        else:
+            vs_past_worker = None
+            num_vs_past = 0
+            num_self_play = num_games
+
+        # Log game distribution
+        if num_vs_past > 0:
+            print(f"  Game distribution: {num_self_play} self-play, {num_vs_past} vs past checkpoint")
 
         # Use tqdm if available, otherwise fall back to basic logging
         if TQDM_AVAILABLE:
             # Use tqdm progress bar (works great in notebooks and terminals)
             pbar = tqdm(range(num_games), desc="  Self-play", unit="game")
             for game_idx in pbar:
+                # Choose worker based on game index
+                if game_idx < num_vs_past and vs_past_worker is not None:
+                    worker = vs_past_worker
+                else:
+                    worker = self_play_worker
+
                 examples = worker.play_game(current_iteration)
                 all_examples.extend(examples)
                 pbar.set_postfix({"examples": len(all_examples)})
@@ -269,6 +392,12 @@ class SelfPlayManager:
                 else:
                     # Terminal: overwrite same line
                     print(f"  Generating game {game_idx + 1}/{num_games}...", end='\r')
+
+                # Choose worker based on game index
+                if game_idx < num_vs_past and vs_past_worker is not None:
+                    worker = vs_past_worker
+                else:
+                    worker = self_play_worker
 
                 examples = worker.play_game(current_iteration)
                 all_examples.extend(examples)

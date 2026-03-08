@@ -94,10 +94,16 @@ class BatchedMCTS:
                 # Selection: Traverse to leaf
                 while not node.is_leaf():
                     action, node = node.select_child(self.c_puct)
+                    assert node is not None and action is not None
                     state = apply_action(state, action, player)
                     player = 3 - player
                     search_path.append(node)
-
+                    
+                # Apply virtual losses to entire path after selection
+                for n in search_path:
+                    n.virtual_loss += 1
+                    n.visit_count += 1
+                    
                 # Check if terminal
                 winner = check_terminal(state)
 
@@ -122,26 +128,24 @@ class BatchedMCTS:
                 for i, data in enumerate(non_terminal_leaves):
                     policy_probs = policies_batch[i]
                     value = values_batch[i]
-
-                    # Expand node
+                    
                     legal_moves = get_legal_moves(data['state'])
                     action_priors = {action: policy_probs[action] for action in legal_moves}
-
-                    # Normalize
                     prior_sum = sum(action_priors.values())
                     if prior_sum > 0:
                         action_priors = {a: p / prior_sum for a, p in action_priors.items()}
-
+                    
                     data['node'].expand(action_priors)
-                    data['value'] = value
+                    data['value'] = value  # already from data['player']'s perspective
 
-            # Process terminal leaves (use actual outcome)
+            # For terminal leaves
             for data in terminal_leaves:
                 data['value'] = get_terminal_value(data['winner'], data['player'])
+                # also already from data['player']'s perspective
 
-            # Backpropagate all leaves in batch
+            # Backpropagate
             for data in leaf_data:
-                self._backpropagate(data['search_path'], data['value'], current_player)
+                self._backpropagate(data['search_path'], data['value'])
 
         # Get action probabilities from visit counts
         action_probs = self._get_action_probs(root, board_state.shape[0], temperature)
@@ -160,22 +164,16 @@ class BatchedMCTS:
                 self.dirichlet_epsilon * noise[i]
             )
 
-    def _backpropagate(self, search_path: list, value: float, root_player: int):
-        """Backpropagate value through search path."""
-        depth = len(search_path) - 1
-
-        # Determine if we need to flip value
-        if depth % 2 == 0:
-            leaf_value = value
-        else:
-            leaf_value = -value
-
-        # Backpropagate with alternating signs
-        for i, node in enumerate(reversed(search_path)):
-            if i % 2 == 0:
-                node.update(leaf_value)
-            else:
-                node.update(-leaf_value)
+    def _backpropagate(self, search_path: list, value: float):
+        """
+        Backpropagate value through search path.
+        Value should be from the perspective of the player at the leaf node.
+        """
+        for node in reversed(search_path):
+            node.visit_count -= 1        # remove temporary inflation
+            node.virtual_loss -= 1
+            node.update(value)
+            value = -value  # parent has opposite perspective
 
     def _get_action_probs(self, root: MCTSNode, board_size: int, temperature: float):
         """Get action probability distribution from visit counts."""

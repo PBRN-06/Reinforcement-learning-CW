@@ -5,6 +5,9 @@ Includes board encoding, legal move generation, and game state management.
 """
 
 import numpy as np
+import os
+import glob
+import re
 from src.rewards import count_sequences
 
 
@@ -223,3 +226,45 @@ def create_valid_move_mask(board_state: np.ndarray) -> np.ndarray:
     board_size = board_state.shape[0]
     mask = (board_state == 0).astype(np.float32).flatten()
     return mask
+
+
+def find_latest_checkpoint(checkpoint_dir: str, current_iteration: int) -> str | None:
+    """
+    Find the most recent checkpoint before the current iteration.
+
+    Args:
+        checkpoint_dir: Directory containing checkpoints
+        current_iteration: Current training iteration
+
+    Returns:
+        Path to latest checkpoint, or None if no checkpoints exist
+    """
+    if not os.path.exists(checkpoint_dir):
+        return None
+
+    # Find all checkpoint files
+    checkpoint_pattern = os.path.join(checkpoint_dir, "checkpoint_*.pt")
+    checkpoint_files = glob.glob(checkpoint_pattern)
+
+    if not checkpoint_files:
+        return None
+
+    # Extract iteration numbers from filenames
+    checkpoint_iterations = []
+    for filepath in checkpoint_files:
+        filename = os.path.basename(filepath)
+        match = re.search(r'checkpoint_(\d+)\.pt', filename)
+        if match:
+            iteration = int(match.group(1))
+            # Only consider checkpoints before current iteration
+            if iteration < current_iteration:
+                checkpoint_iterations.append((iteration, filepath))
+
+    if not checkpoint_iterations:
+        return None
+
+    # Return the most recent checkpoint
+    checkpoint_iterations.sort(key=lambda x: x[0], reverse=True)
+    latest_path = checkpoint_iterations[0][1]
+
+    return latest_path
