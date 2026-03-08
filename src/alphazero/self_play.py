@@ -98,16 +98,12 @@ class SelfPlayWorker:
         """
         max_random = self.config.random_opening_moves
         max_iterations = self.config.num_iterations
-
-        # Adaptive schedule: decay random moves as training progresses
-        if iteration <= max_iterations * 0.3:  # First 30% of training
-            return max_random
-        elif iteration <= max_iterations * 0.6:  # Next 30% (30-60%)
-            return max(max_random // 2, 0)
-        elif iteration <= max_iterations * 0.8:  # Next 20% (60-80%)
-            return max(max_random // 5, 0)
-        else:  # Final 20%
-            return 0
+        
+        # Linear decay from max_random to 0 over full training
+        progress = min(iteration / max_iterations, 1.0)
+        decay = 1.0 - progress
+        
+        return max(int(max_random * decay), 0)
 
     def _get_temperature(self, move_count: int, iteration: int) -> float:
         """
@@ -186,8 +182,8 @@ class SelfPlayWorker:
                     mcts_policy, _ = self.opponent_mcts.search(
                         canonical_board,
                         current_player=1,  # Always 1 in canonical form
-                        add_noise=True,
-                        temperature=temperature
+                        add_noise=False,   # Stable target
+                        temperature=0.1    #  "
                     )
                 else:
                     # Self-play or player 1 move
@@ -198,12 +194,14 @@ class SelfPlayWorker:
                         temperature=temperature
                     )
 
-                # Store training example (before making move)
-                examples.append({
-                    'state': canonical_board.copy(),
-                    'policy': mcts_policy.copy(),
-                    'player': current_player
-                })
+                # Store training example (before making move) from the learning agent specifically
+                is_opponent_move = (current_player == 2 and self.opponent_mcts is not None)
+                if not is_opponent_move:
+                    examples.append({
+                        'state': canonical_board.copy(),
+                        'policy': mcts_policy.copy(),
+                        'player': current_player
+                    })
 
                 # Sample action from MCTS policy
                 legal_moves = get_legal_moves(board)

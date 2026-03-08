@@ -167,7 +167,7 @@ class AlphaZeroTrainer:
             train_metrics = self.train_network()
 
             # Step 3.5: Update learning rate scheduler based on loss
-            self.scheduler.step(train_metrics['total_loss'])
+            self.scheduler.step()
 
             print(f"\n{'=' * 60}")
             print(f"Iteration {self.iteration} Summary:")
