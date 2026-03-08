@@ -12,7 +12,7 @@ import numpy as np
 from src.alphazero.network import AlphaZeroNetwork
 from src.alphazero.self_play import SelfPlayManager
 from src.data.replay_buffer import ReplayBuffer
-from src.alphazero.utils import encode_board_state
+from src.alphazero.utils import encode_board_state, get_legal_moves
 
 # Try to import tqdm for progress bars
 try:
@@ -53,12 +53,17 @@ class AlphaZeroTrainer:
         )
 
         # Create learning rate scheduler (reduces LR when loss plateaus)
-        self.scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
+        # self.scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
+        #     self.optimizer,
+        #     mode='min',           # Minimize loss
+        #     factor=0.5,           # Reduce LR by 50% when triggered
+        #     patience=10,          # Wait 10 iterations before reducing
+        #     min_lr=1e-6          # Don't go below this LR
+        # )
+        self.scheduler = torch.optim.lr_scheduler.MultiStepLR(
             self.optimizer,
-            mode='min',           # Minimize loss
-            factor=0.5,           # Reduce LR by 50% when triggered
-            patience=10,          # Wait 10 iterations before reducing
-            min_lr=1e-6          # Don't go below this LR
+            milestones=[150,300,500],
+            gamma=0.1
         )
 
         # Create replay buffer
@@ -170,6 +175,8 @@ class AlphaZeroTrainer:
             print(f"  Policy loss: {train_metrics['policy_loss']:.4f}")
             print(f"  Value loss: {train_metrics['value_loss']:.4f}")
             print(f"  Total loss: {train_metrics['total_loss']:.4f}")
+            print(f"  Network entropy: {train_metrics['net_entropy']:.4f}")
+            print(f"  Target entropy: {train_metrics['target_entropy']:.4f}")
             print(f"{'=' * 60}")
 
             # Step 4: Log metrics
@@ -205,6 +212,8 @@ class AlphaZeroTrainer:
         total_policy_loss = 0.0
         total_value_loss = 0.0
         total_loss = 0.0
+        total_net_entropy = 0.0
+        total_target_entropy = 0.0
         num_batches = 0
 
         for epoch in range(self.config.epochs_per_iteration):
@@ -231,8 +240,10 @@ class AlphaZeroTrainer:
                 policy_logits, value_pred = self.network(state_tensors)
 
                 # Compute losses
-                policy_loss = self._policy_loss(policy_logits, policy_targets)
+                mask = self.__batch_mask(policy_logits, states)
+                policy_loss = self._policy_loss(policy_logits, policy_targets, mask)
                 value_loss = self._value_loss(value_pred, value_targets)
+                net_entropy, target_entropy = self._entropy(policy_logits, policy_targets, mask)
                 # Weight value loss to balance gradient magnitudes (policy ~2.8, value ~0.08)
                 # This ensures value head gets sufficient gradient signal
                 loss = policy_loss + 0.5 * value_loss
@@ -253,6 +264,8 @@ class AlphaZeroTrainer:
                 total_policy_loss += policy_loss.item()
                 total_value_loss += value_loss.item()
                 total_loss += loss.item()
+                total_net_entropy += net_entropy.item()
+                total_target_entropy += target_entropy.item()
                 num_batches += 1
 
                 # Update progress bar with loss
@@ -267,23 +280,44 @@ class AlphaZeroTrainer:
         return {
             'policy_loss': total_policy_loss / max(num_batches, 1),
             'value_loss': total_value_loss / max(num_batches, 1),
-            'total_loss': total_loss / max(num_batches, 1)
+            'total_loss': total_loss / max(num_batches, 1),
+            'net_entropy': total_net_entropy / max(num_batches, 1),
+            'target_entropy': total_target_entropy / max(num_batches, 1),
         }
 
-    def _policy_loss(self, logits, targets):
+    def __batch_mask(self, logits, states):
+        mask = torch.zeros_like(logits, dtype=torch.bool)
+        for i,state in enumerate(states):
+            legal = get_legal_moves(state)
+            mask[i, legal] = True
+
+        return mask
+
+    def _policy_loss(self, logits, targets, batch_mask):
         """
         Cross-entropy loss between MCTS policy and network policy.
 
         Args:
             logits: (batch, num_actions) network policy logits
             targets: (batch, num_actions) MCTS policy distribution
+            batch_mask: logits mask for invalid states
 
         Returns:
             Scalar loss
         """
-        # Log-softmax on logits, then negative log-likelihood
-        log_probs = F.log_softmax(logits, dim=1)
+        masked_logits = logits.clone()
+        masked_logits[~batch_mask] = -float('inf')
+
+        # Fix -inf * 0 = nan by zeroing out -inf positions in log_probs
+        log_probs = F.log_softmax(masked_logits, dim=1)
+        log_probs = torch.where(
+            torch.isfinite(log_probs),
+            log_probs,
+            torch.zeros_like(log_probs)
+        )
+
         loss = -torch.sum(targets * log_probs, dim=1).mean()
+
         return loss
 
     def _value_loss(self, pred, target):
@@ -298,6 +332,33 @@ class AlphaZeroTrainer:
             Scalar loss
         """
         return F.mse_loss(pred, target)
+    
+    def _entropy(self, logits, targets, batch_mask):
+        """
+        Entropy of current loss
+
+        Args:
+            logits: (batch, num_actions) network policy logits
+            targets: (batch, num_actions) MCTS policy distribution
+            batch_mask: logits mask for invalid states
+
+        Returns:
+            (Scalar,Scalar) network entropy, target entropy
+        """
+        masked_logits = logits.clone()
+        masked_logits[~batch_mask] = -float('inf')
+
+        with torch.no_grad():
+            predicted_probs = F.softmax(masked_logits, dim=1)
+
+            masked_logits = logits.clone()
+            masked_logits[~batch_mask] = -float('inf')
+
+            network_entropy = -torch.sum(predicted_probs * torch.log(predicted_probs + 1e-8), dim=1).mean()
+
+            target_entropy = -torch.sum(targets * torch.log(targets + 1e-8), dim=1).mean()
+
+            return network_entropy,target_entropy
 
     def _encode_batch(self, states):
         """
@@ -332,7 +393,9 @@ class AlphaZeroTrainer:
             'total_games': self.total_games,
             'policy_loss': train_metrics['policy_loss'],
             'value_loss': train_metrics['value_loss'],
-            'total_loss': train_metrics['total_loss']
+            'total_loss': train_metrics['total_loss'],
+            'network_entropy': train_metrics['net_entropy'],
+            'target_entropy': train_metrics['target_entropy']
         }
 
         self.metrics_history.append(metrics_entry)
