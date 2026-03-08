@@ -176,12 +176,22 @@ class AlphaZeroTrainer:
             self._log_metrics(train_metrics)
 
             # Step 5: Save checkpoint
-            if self.iteration % self.config.checkpoint_freq == 0:
+            if self.__should_save_checkpoint():
                 self.save_checkpoint()
 
         print(f"\n{'=' * 60}")
         print(f"Training Complete!")
         print(f"{'=' * 60}\n")
+        
+    def __should_save_checkpoint(self) -> bool:
+        if self.iteration < 20:
+            return True          # every iteration early on
+        elif self.iteration < 50:
+            return self.iteration % 3 == 0
+        elif self.iteration < 100:
+            return self.iteration % 5 == 0
+        else:
+            return self.iteration % 10 == 0
 
     def train_network(self):
         """

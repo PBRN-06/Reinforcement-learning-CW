@@ -32,7 +32,16 @@ class AlphaZeroConfig:
     num_workers: int = 4
     generation_frequency: int = 1  # Generate new games every N iterations (1=every iteration, 5=every 5th)
     random_opening_moves: int = 10  # Number of random moves at game start (adaptive decay based on iteration)
-    past_opponent_ratio: float = 0.5  # Fraction of games vs last saved checkpoint (0.5=half games vs past)
+
+    # Opponent selection strategy with adaptive rolloff
+    # Ratios adapt based on checkpoint pool size:
+    # - No checkpoints: 70% self-play, 30% random
+    # - Small pool (<5): 40% self-play, 30% pool, 30% random
+    # - Full pool (≥5): 20% self-play, 60% pool, 20% random
+    pool_size_max: int = 15  # Maximum number of checkpoints in pool
+
+    # Deprecated (kept for backward compatibility)
+    past_opponent_ratio: float = 0.0  # Legacy parameter
 
     # Training
     num_iterations: int = 1000

@@ -268,3 +268,52 @@ def find_latest_checkpoint(checkpoint_dir: str, current_iteration: int) -> str |
     latest_path = checkpoint_iterations[0][1]
 
     return latest_path
+
+
+def find_checkpoint_pool(checkpoint_dir: str, current_iteration: int,
+                        pool_size_max: int = 15) -> list:
+    """
+    Find a pool of recent checkpoints before the current iteration.
+
+    Returns the most recent checkpoints up to pool_size_max.
+    No minimum requirement - returns whatever is available.
+
+    Args:
+        checkpoint_dir: Directory containing checkpoints
+        current_iteration: Current training iteration
+        pool_size_max: Maximum number of checkpoints to return
+
+    Returns:
+        List of checkpoint paths (most recent first), or empty list if no checkpoints
+    """
+    if not os.path.exists(checkpoint_dir):
+        return []
+
+    # Find all checkpoint files
+    checkpoint_pattern = os.path.join(checkpoint_dir, "checkpoint_*.pt")
+    checkpoint_files = glob.glob(checkpoint_pattern)
+
+    if not checkpoint_files:
+        return []
+
+    # Extract iteration numbers from filenames
+    checkpoint_iterations = []
+    for filepath in checkpoint_files:
+        filename = os.path.basename(filepath)
+        match = re.search(r'checkpoint_(\d+)\.pt', filename)
+        if match:
+            iteration = int(match.group(1))
+            # Only consider checkpoints before current iteration
+            if iteration < current_iteration:
+                checkpoint_iterations.append((iteration, filepath))
+
+    if not checkpoint_iterations:
+        return []
+
+    # Sort by iteration (most recent first)
+    checkpoint_iterations.sort(key=lambda x: x[0], reverse=True)
+
+    # Return up to pool_size_max checkpoints
+    pool_paths = [path for _, path in checkpoint_iterations[:pool_size_max]]
+
+    return pool_paths
