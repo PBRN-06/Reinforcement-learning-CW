@@ -51,7 +51,7 @@ def main():
     print(f"  Network: {config.num_res_blocks} ResBlocks, {config.num_filters} filters")
     print(f"  MCTS: {config.num_simulations} simulations per move")
     print(f"  Self-play: {config.games_per_iteration} games per iteration")
-    print(f"  Training: {config.epochs_per_iteration} epochs, batch size {config.batch_size}")
+    print(f"  Training: {config.epochs_per_iteration} epochs, batch size {config.batch_size}, recency fraction {config.recent_priority}")
     print(f"  Total iterations: {config.num_iterations}")
     print(f"  Checkpoint frequency: every {config.checkpoint_freq} iterations")
 

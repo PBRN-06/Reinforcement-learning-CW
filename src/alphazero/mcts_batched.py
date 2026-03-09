@@ -84,26 +84,30 @@ class BatchedMCTS:
 
             # Collect batch of leaf nodes
             leaf_data = []
-
+            
             for _ in range(batch_size_actual):
                 node = root
                 state = board_state.copy()
                 player = current_player
                 search_path = [node]
+                
+                # Apply virtual loss to root immediately
+                root.virtual_loss += 1
+                root.visit_count += 1
 
                 # Selection: Traverse to leaf
                 while not node.is_leaf():
                     action, node = node.select_child(self.c_puct)
                     assert node is not None and action is not None
+                    
+                    # Apply virtual loss immediately so next simulation sees it
+                    node.virtual_loss += 1
+                    node.visit_count += 1
+                    
                     state = apply_action(state, action, player)
                     player = 3 - player
                     search_path.append(node)
-                    
-                # Apply virtual losses to entire path after selection
-                for n in search_path:
-                    n.virtual_loss += 1
-                    n.visit_count += 1
-                    
+
                 # Check if terminal
                 winner = check_terminal(state)
 

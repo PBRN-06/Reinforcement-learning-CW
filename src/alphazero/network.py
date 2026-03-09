@@ -128,8 +128,6 @@ class AlphaZeroNetwork(nn.Module):
             policy_probs: (num_actions,) numpy array of action probabilities
             value: float in [-1, 1]
         """
-        self.eval()
-
         # Encode board state
         encoded = encode_board_state(board_state, self.board_size)
         state_tensor = torch.FloatTensor(encoded).unsqueeze(0)  # Add batch dim
@@ -168,8 +166,6 @@ class AlphaZeroNetwork(nn.Module):
             policy_probs_batch: List of (num_actions,) numpy arrays
             values_batch: List of floats in [-1, 1]
         """
-        self.eval()
-
         if len(board_states) == 0:
             return [], []
 

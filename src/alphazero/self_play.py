@@ -194,9 +194,10 @@ class SelfPlayWorker:
                         temperature=temperature
                     )
 
-                # Store training example (before making move) from the learning agent specifically
-                is_opponent_move = (current_player == 2 and self.opponent_mcts is not None)
-                if not is_opponent_move:
+                # Store training example (before making move), ignoring checkpoint agents since those are fixed
+                is_checkpoint_opponent_move = (current_player == 2 and self.opponent_mcts is not None)
+
+                if not is_checkpoint_opponent_move:
                     examples.append({
                         'state': canonical_board.copy(),
                         'policy': mcts_policy.copy(),

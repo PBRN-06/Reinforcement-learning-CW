@@ -66,28 +66,40 @@ class ReplayBuffer:
             'outcomes': outcomes
         }
 
-    def get_dataset(self):
-        """
-        Get PyTorch Dataset for DataLoader.
+    def get_dataset(self, recent_priority: float = 0.5):
+        buffer_size = len(self.buffer)
+        
+        if buffer_size < 1000:
+            return AlphaZeroDataset(self.buffer)
+        
+        recent_cutoff = int(buffer_size * 0.8)
+        recent_examples = self.buffer[recent_cutoff:]
+        old_examples = self.buffer[:recent_cutoff]
+        
+        # recent_priority controls what fraction of the dataset is recent examples
+        # e.g. 0.5 means 50% recent, 50% old regardless of their actual sizes
+        target_size = buffer_size
+        num_recent = int(target_size * recent_priority)
+        num_old = target_size - num_recent
+        
+        # Oversample recent, undersample old to hit target ratio
+        recent_sampled = [recent_examples[i % len(recent_examples)] 
+                        for i in range(num_recent)]
+        old_sampled = [old_examples[i % len(old_examples)] 
+                    for i in range(num_old)]
+        
+        combined = recent_sampled + old_sampled
+        return AlphaZeroDataset(combined)
 
-        Returns:
-            AlphaZeroDataset instance
-        """
-        return AlphaZeroDataset(self.buffer)
+    def get_data_loader(self, batch_size: int, shuffle: bool = True, recent_priority: float = 0.5):
+        dataset = self.get_dataset(recent_priority)  # pass through
+        return DataLoader(
+            dataset,
+            batch_size=batch_size,
+            shuffle=shuffle,
+            num_workers=0
+        )
 
-    def get_data_loader(self, batch_size: int, shuffle: bool = True):
-        """
-        Create PyTorch DataLoader.
-
-        Args:
-            batch_size: Batch size for training
-            shuffle: Whether to shuffle data
-
-        Returns:
-            DataLoader instance
-        """
-        dataset = self.get_dataset()
-        return DataLoader(dataset, batch_size=batch_size, shuffle=shuffle, num_workers=0)
 
     def clear(self):
         """Clear all examples from buffer."""

@@ -23,6 +23,8 @@ from src.alphazero.agent import AlphaZeroAgent
 from src.agent import RL_Agent
 from src.alphazero.utils import check_terminal
 
+from src.alphazero.config import AlphaZeroConfig
+
 
 def play_game(agent1, agent2, verbose: bool = False):
     """
@@ -96,6 +98,8 @@ def main():
                         help='Print detailed game information')
     args = parser.parse_args()
 
+    config = AlphaZeroConfig.from_yaml("config.yaml")
+
     # Load agents
     print("\n" + "=" * 60)
     print("AlphaZero Evaluation")
@@ -109,7 +113,9 @@ def main():
             checkpoint_path=args.agent1,
             num_simulations=args.simulations,
             temperature=args.temperature,
-            batch_size=args.batch_size
+            batch_size=args.batch_size,
+            num_res_blocks=config.num_res_blocks,
+            num_filters=config.num_filters
         )
         agent1_name = f"AlphaZero({os.path.basename(args.agent1)})"
 

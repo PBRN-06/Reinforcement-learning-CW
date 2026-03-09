@@ -44,6 +44,7 @@ class AlphaZeroTrainer:
         # Move to device
         self.device = torch.device(config.device)
         self.network.to(self.device)
+        self.network.eval()  # start in eval mode - no running stats yet but better than train() for single samples
 
         # Create optimizer
         self.optimizer = torch.optim.Adam(
@@ -95,15 +96,9 @@ class AlphaZeroTrainer:
         max_random = self.config.random_opening_moves
         max_iterations = self.config.num_iterations
 
-        # Adaptive schedule: decay random moves as training progresses
-        if iteration <= max_iterations * 0.3:  # First 30% of training
-            return max_random
-        elif iteration <= max_iterations * 0.6:  # Next 30% (30-60%)
-            return max(max_random // 2, 0)
-        elif iteration <= max_iterations * 0.8:  # Next 20% (60-80%)
-            return max(max_random // 5, 0)
-        else:  # Final 20%
-            return 0
+        # Faster decay - reach 0 by 20% of max iterations
+        progress = min(iteration / (max_iterations * 0.2), 1.0)
+        return max(int(max_random * (1.0 - progress)), 0)
 
     def train(self):
         """Main training loop."""
@@ -182,6 +177,13 @@ class AlphaZeroTrainer:
             # Step 4: Log metrics
             self._log_metrics(train_metrics)
 
+            # NOW switch to eval for self-play - running stats are fresh from training
+            self.network.eval()  # self-play will use updated running stats
+
+            # self.__diagnose_policy_learning(self.network, self.replay_buffer, "cuda" if torch.cuda.is_available() else "cpu")
+            # self.__diagnose_buffer(self.replay_buffer, self.network, self.device)
+            # self.__diagnose_gradient_flow(self.network, self.replay_buffer, self.device) # Expect to see none in value head
+
             # Step 5: Save checkpoint
             if self.__should_save_checkpoint():
                 self.save_checkpoint()
@@ -189,7 +191,154 @@ class AlphaZeroTrainer:
         print(f"\n{'=' * 60}")
         print(f"Training Complete!")
         print(f"{'=' * 60}\n")
+
+    def __diagnose_policy_learning(self, model, replay_buffer, device, num_samples=10):
+        model.eval()
+        with torch.no_grad():
+            # Grab a small fixed sample from buffer
+            batch = replay_buffer.sample(num_samples)
+            states = torch.FloatTensor(batch['states'])
+            state_tensors = self._encode_batch(states).to(device)
+            targets = torch.FloatTensor(batch['policies']).to(device)
+            
+            # Forward pass
+            policy_logits, values = model(state_tensors)
+            probs = torch.softmax(policy_logits, dim=1)
+            
+            for i in range(min(3, num_samples)):
+                target = targets[i]
+                pred = probs[i]
+                
+                # Top 5 moves according to target vs prediction
+                target_top5 = torch.topk(target, 5)
+                pred_top5 = torch.topk(pred, 5)
+                
+                print(f"\nSample {i+1}:")
+                print(f"  Target top5 moves:    {target_top5.indices.tolist()}")
+                print(f"  Target top5 probs:    {[f'{p:.3f}' for p in target_top5.values.tolist()]}")
+                print(f"  Predicted top5 moves: {pred_top5.indices.tolist()}")
+                print(f"  Predicted top5 probs: {[f'{p:.3f}' for p in pred_top5.values.tolist()]}")
+                
+                # Overlap between top5
+                overlap = len(set(target_top5.indices.tolist()) & 
+                            set(pred_top5.indices.tolist()))
+                print(f"  Top5 overlap: {overlap}/5")
+                
+                print(f"  Value prediction: {values[i].item():.3f}")
+
+        model.train()
         
+    def __diagnose_buffer(self, replay_buffer, network, device):
+        buffer = replay_buffer.buffer
+        print(f"Buffer size: {len(buffer)}")
+        
+        # Outcome distribution
+        outcomes = [ex['outcome'] for ex in buffer]
+        print(f"Outcome mean: {np.mean(outcomes):.3f}")
+        print(f"Outcome std: {np.std(outcomes):.3f}")
+        print(f"Wins (>0.5):  {sum(1 for o in outcomes if o > 0.5) / len(outcomes):.2%}")
+        print(f"Losses (<-0.5): {sum(1 for o in outcomes if o < -0.5) / len(outcomes):.2%}")
+        print(f"Draws (~0): {sum(1 for o in outcomes if abs(o) < 0.5) / len(outcomes):.2%}")
+        
+        # Policy distribution - are targets actually peaked?
+        policies = np.array([ex['policy'] for ex in buffer[:100]])
+        max_probs = policies.max(axis=1)
+        print(f"\nPolicy max prob - mean: {max_probs.mean():.3f}, std: {max_probs.std():.3f}")
+        print(f"Policies with max_prob > 0.3: {(max_probs > 0.3).mean():.2%}")
+        print(f"Policies with max_prob < 0.05: {(max_probs < 0.05).mean():.2%}")
+        
+        # Are policies summing to 1?
+        policy_sums = policies.sum(axis=1)
+        print(f"\nPolicy sums - mean: {policy_sums.mean():.4f}, min: {policy_sums.min():.4f}")
+        
+        # Sample a few raw examples
+        print("\nSample policies (top 3 moves and probs):")
+        for i in range(3):
+            ex = buffer[i * (len(buffer) // 3)]
+            policy = ex['policy']
+            top3_idx = np.argsort(policy)[-3:][::-1]
+            top3_probs = policy[top3_idx]
+            print(f"  Example {i+1}: moves={top3_idx.tolist()}, "
+                f"probs={[f'{p:.3f}' for p in top3_probs]}, "
+                f"outcome={ex['outcome']:.1f}")
+        
+        # Check if states look valid
+        print("\nSample board states (stone counts):")
+        for i in range(3):
+            ex = buffer[i * (len(buffer) // 3)]
+            state = ex['state']
+            print(f"  Example {i+1}: P1 stones={int((state==1).sum())}, "
+                f"P2 stones={int((state==2).sum())}, "
+                f"Empty={(state==0).sum()}")
+            
+    def __diagnose_gradient_flow(self, network, replay_buffer, device, batch_size=256):
+        network.train()
+        optimizer = torch.optim.Adam(network.parameters(), lr=0.001)
+        
+        # Get one batch
+        batch = replay_buffer.sample(batch_size)
+        states = torch.FloatTensor(batch['states'])
+        
+        # Encode
+        encoded = torch.zeros(batch_size, 3, 9, 9)
+        for i in range(batch_size):
+            encoded[i] = torch.from_numpy(encode_board_state(states[i].numpy(), 9))
+        encoded = encoded.to(device)
+        
+        policies = torch.FloatTensor(batch['policies']).to(device)
+        
+        # Forward
+        policy_logits, value = network(encoded)
+        
+        # Check logit distribution BEFORE loss
+        print("=== BEFORE BACKWARD ===")
+        print(f"Logits std: {policy_logits.std().item():.4f}")
+        print(f"Logits mean: {policy_logits.mean().item():.4f}")
+        probs = torch.softmax(policy_logits, dim=1)
+        print(f"Max prob mean: {probs.max(dim=1).values.mean().item():.4f}")
+        
+        # Compute loss
+        mask = torch.zeros_like(policy_logits, dtype=torch.bool)
+        for i in range(batch_size):
+            legal = get_legal_moves(states[i].numpy())
+            mask[i, legal] = True
+        
+        masked_logits = policy_logits.clone()
+        masked_logits[~mask] = -float('inf')
+        log_probs = F.log_softmax(masked_logits, dim=1)
+        log_probs = torch.where(torch.isfinite(log_probs), log_probs, torch.zeros_like(log_probs))
+        loss = -torch.sum(policies * log_probs, dim=1).mean()
+        
+        print(f"\nLoss: {loss.item():.4f}")
+        
+        # Backward
+        optimizer.zero_grad()
+        loss.backward()
+        
+        # Check gradients per layer
+        print("\n=== GRADIENTS PER LAYER ===")
+        for name, param in network.named_parameters():
+            if param.grad is not None:
+                grad_norm = param.grad.norm().item()
+                param_norm = param.norm().item()
+                print(f"{name:50s} grad_norm={grad_norm:.6f} param_norm={param_norm:.4f}")
+            else:
+                print(f"{name:50s} NO GRADIENT")
+        
+        # Now do one update and check if logits change
+        optimizer.step()
+        
+        with torch.no_grad():
+            policy_logits2, _ = network(encoded)
+            print(f"\n=== AFTER ONE UPDATE ===")
+            print(f"Logits std change: {policy_logits.std().item():.4f} -> {policy_logits2.std().item():.4f}")
+            print(f"Max prob change: {probs.max(dim=1).values.mean().item():.4f} -> "
+                f"{torch.softmax(policy_logits2, dim=1).max(dim=1).values.mean().item():.4f}")
+            
+            # Are logits actually changing?
+            logit_delta = (policy_logits2 - policy_logits.detach()).abs().mean().item()
+            print(f"Mean absolute logit change: {logit_delta:.6f}")
+
     def __should_save_checkpoint(self) -> bool:
         if self.iteration < 20:
             return True          # every iteration early on
@@ -220,7 +369,8 @@ class AlphaZeroTrainer:
             # Create DataLoader
             data_loader = self.replay_buffer.get_data_loader(
                 batch_size=self.config.batch_size,
-                shuffle=True
+                shuffle=True,
+                recent_priority=self.config.recent_priority
             )
 
             # Wrap with tqdm if available
@@ -244,8 +394,7 @@ class AlphaZeroTrainer:
                 policy_loss = self._policy_loss(policy_logits, policy_targets, mask)
                 value_loss = self._value_loss(value_pred, value_targets)
                 net_entropy, target_entropy = self._entropy(policy_logits, policy_targets, mask)
-                # Weight value loss to balance gradient magnitudes (policy ~2.8, value ~0.08)
-                # This ensures value head gets sufficient gradient signal
+                # Weight value loss
                 loss = policy_loss + 0.5 * value_loss
 
                 # Backward pass
@@ -331,6 +480,9 @@ class AlphaZeroTrainer:
         Returns:
             Scalar loss
         """
+        # Ensure shapes match - both should be (batch, 1)
+        pred = pred.view(-1, 1)
+        target = target.view(-1, 1)
         return F.mse_loss(pred, target)
     
     def _entropy(self, logits, targets, batch_mask):

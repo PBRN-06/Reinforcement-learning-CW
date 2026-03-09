@@ -47,6 +47,7 @@ class AlphaZeroConfig:
     num_iterations: int = 1000
     epochs_per_iteration: int = 10
     batch_size: int = 256
+    recent_priority: float = 0.5
     learning_rate: float = 1e-3
     weight_decay: float = 1e-4
     grad_clip: float = 5.0

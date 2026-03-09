@@ -71,29 +71,37 @@ def plot_loss_curves(metrics: List[Dict], output_path: str = "./logs/loss_curves
     policy_loss = [m['policy_loss'] for m in metrics]
     value_loss = [m['value_loss'] for m in metrics]
     total_loss = [m['total_loss'] for m in metrics]
+    d_entropy = [m['target_entropy'] - m['network_entropy'] for m in metrics]
 
-    fig, axes = plt.subplots(1, 3, figsize=(15, 4))
+    fig, axes = plt.subplots(2, 3, figsize=(15, 8))
 
     # Policy loss
-    axes[0].plot(iterations, policy_loss, linewidth=2, color='#2196F3')
-    axes[0].set_xlabel('Iteration')
-    axes[0].set_ylabel('Policy Loss')
-    axes[0].set_title('Policy Loss Over Training')
-    axes[0].grid(True, alpha=0.3)
+    axes[0][0].plot(iterations, policy_loss, linewidth=2, color='#2196F3')
+    axes[0][0].set_xlabel('Iteration')
+    axes[0][0].set_ylabel('Policy Loss')
+    axes[0][0].set_title('Policy Loss Over Training')
+    axes[0][0].grid(True, alpha=0.3)
 
     # Value loss
-    axes[1].plot(iterations, value_loss, linewidth=2, color='#4CAF50')
-    axes[1].set_xlabel('Iteration')
-    axes[1].set_ylabel('Value Loss')
-    axes[1].set_title('Value Loss Over Training')
-    axes[1].grid(True, alpha=0.3)
+    axes[0][1].plot(iterations, value_loss, linewidth=2, color='#4CAF50')
+    axes[0][1].set_xlabel('Iteration')
+    axes[0][1].set_ylabel('Value Loss')
+    axes[0][1].set_title('Value Loss Over Training')
+    axes[0][1].grid(True, alpha=0.3)
 
     # Total loss
-    axes[2].plot(iterations, total_loss, linewidth=2, color='#FF5722')
-    axes[2].set_xlabel('Iteration')
-    axes[2].set_ylabel('Total Loss')
-    axes[2].set_title('Total Loss Over Training')
-    axes[2].grid(True, alpha=0.3)
+    axes[0][2].plot(iterations, total_loss, linewidth=2, color='#FF5722')
+    axes[0][2].set_xlabel('Iteration')
+    axes[0][2].set_ylabel('Total Loss')
+    axes[0][2].set_title('Total Loss Over Training')
+    axes[0][2].grid(True, alpha=0.3)
+
+    # Delta entropy
+    axes[1][0].plot(iterations, d_entropy, linewidth=2)
+    axes[1][0].set_xlabel('Iteration')
+    axes[1][0].set_ylabel('Delta Entropy')
+    axes[1][0].set_title('Delta Entropy Over Training')
+    axes[1][0].grid(True, alpha=0.3)
 
     plt.tight_layout()
     plt.savefig(output_path, dpi=150, bbox_inches='tight')
