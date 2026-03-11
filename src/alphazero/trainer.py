@@ -572,7 +572,10 @@ class AlphaZeroTrainer:
             'config': self.config
         }, checkpoint_path)
 
-        print(f"\n  Checkpoint saved: {checkpoint_path}")
+        buffer_path = os.path.join(self.config.checkpoint_dir, "replay_buffer.pt")
+        torch.save(self.replay_buffer.buffer, buffer_path)
+
+        print(f"\n  Checkpoint saved: {checkpoint_path} | Buffer saved:  {buffer_path}")
 
     def load_checkpoint(self, path: str):
         """
@@ -610,6 +613,14 @@ class AlphaZeroTrainer:
             with open(self.metrics_log_path, 'w') as f:
                 json.dump(self.metrics_history, f, indent=2)
             print(f"  Saved cleaned metrics to {self.metrics_log_path}")
+
+        # Load replay buffer if available
+        buffer_path = os.path.join(self.config.checkpoint_dir, "replay_buffer.pt")
+        if os.path.exists(buffer_path):
+            self.replay_buffer.buffer = torch.load(buffer_path, weights_only=False)
+            print(f"  Restored replay buffer: {len(self.replay_buffer)} examples")
+        else:
+            print(f"  No replay buffer found at {buffer_path} - will regenerate")
 
         print(f"  Resumed from iteration {self.iteration}")
         print(f"  Total games played: {self.total_games}")
