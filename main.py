@@ -2,8 +2,9 @@ from src.agent import *
 from src.board import Board
 from src.rewards import calculate_reward
 
-from PySide6.QtWidgets import QApplication, QMainWindow, QWidget, QGridLayout, QPushButton, QHBoxLayout
+from PySide6.QtWidgets import QApplication, QMainWindow, QWidget, QGridLayout, QPushButton, QHBoxLayout, QMessageBox
 from PySide6.QtCore import Qt
+import numpy as np
 import sys
 from typing import Literal
 
@@ -17,7 +18,8 @@ class GameWindow(QMainWindow):
   square_size = 64
   margin = 4
 
-  def __init__(self, board : Board, board_size : int, players : tuple[Agent, Agent]):
+  def __init__(self, board : Board, board_size : int, players : tuple[Agent, Agent],
+               player_names : tuple[str, str] = ("Player 1", "Player 2")):
     super().__init__()
 
     self.setGeometry(100, 100, 1024, 768)
@@ -48,6 +50,7 @@ class GameWindow(QMainWindow):
     self.awaiting_board_input = False
     self.current_player : Literal[0,1] = 0
     self.players = players
+    self.player_names = player_names
 
     self.update_game()
 
@@ -58,7 +61,7 @@ class GameWindow(QMainWindow):
         self.awaiting_board_input = False
         self.player_complete()
       else:
-        print("Not expecting input")
+        pass
     return click
   
   def update_game(self):
@@ -91,9 +94,23 @@ class GameWindow(QMainWindow):
         
     self.current_player = (self.current_player + 1) % 2
     if self.board.check_win():
-      self.close()
+      winner_idx = 1 - self.current_player  # player who just moved
+      winner_color = "Red" if winner_idx == 0 else "Blue"
+      winner_name = self.player_names[winner_idx]
+      self._end_game(f"{winner_name} ({winner_color}) wins!")
+    elif not np.any(self.board.base == 0):
+      self._end_game("It's a draw!")
     else:
       self.update_game()
+
+  def _end_game(self, message: str):
+    for btn in self.btns.values():
+      btn.setDisabled(True)
+    msg = QMessageBox(self)
+    msg.setWindowTitle("Game Over")
+    msg.setText(message)
+    msg.setStandardButtons(QMessageBox.StandardButton.Ok)
+    msg.exec()
 
 try:
   app = QApplication()

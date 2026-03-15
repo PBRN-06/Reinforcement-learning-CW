@@ -21,6 +21,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')
 from src.board import Board
 from src.alphazero.agent import AlphaZeroAgent
 from src.agent import RL_Agent
+from src.pure_mcts_agent import PureMCTSAgent
 from src.alphazero.utils import check_terminal
 
 from src.alphazero.config import AlphaZeroConfig
@@ -74,8 +75,6 @@ def play_game(agent1, agent2, verbose: bool = False):
     if verbose:
         if winner == 0:
             print("Game ended in a draw")
-        else:
-            print(f"Player {winner} wins!")
 
     return winner if winner is not None else 0
 
@@ -83,9 +82,9 @@ def play_game(agent1, agent2, verbose: bool = False):
 def main():
     parser = argparse.ArgumentParser(description='Evaluate AlphaZero agents')
     parser.add_argument('--agent1', type=str, required=True,
-                        help='Path to agent1 checkpoint or "random"')
+                        help='Path to agent1 checkpoint, "random", or "mcts"')
     parser.add_argument('--agent2', type=str, required=True,
-                        help='Path to agent2 checkpoint or "random"')
+                        help='Path to agent2 checkpoint, "random", or "mcts"')
     parser.add_argument('--games', type=int, default=20,
                         help='Number of games to play (default: 20)')
     parser.add_argument('--simulations', type=int, default=400,
@@ -108,6 +107,9 @@ def main():
     if args.agent1 == 'random':
         agent1 = RL_Agent()
         agent1_name = "Random"
+    elif args.agent1 == 'mcts':
+        agent1 = PureMCTSAgent(num_simulations=args.simulations)
+        agent1_name = f"PureMCTS(sims={args.simulations})"
     else:
         agent1 = AlphaZeroAgent(
             checkpoint_path=args.agent1,
@@ -122,6 +124,9 @@ def main():
     if args.agent2 == 'random':
         agent2 = RL_Agent()
         agent2_name = "Random"
+    elif args.agent2 == 'mcts':
+        agent2 = PureMCTSAgent(num_simulations=args.simulations)
+        agent2_name = f"PureMCTS(sims={args.simulations})"
     else:
         agent2 = AlphaZeroAgent(
             checkpoint_path=args.agent2,

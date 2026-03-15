@@ -1,13 +1,15 @@
 #!/usr/bin/env python3
 """
-Play Gomoku vs AlphaZero Agent with GUI
+Play Gomoku vs an AI agent with GUI
 
-Interactive GUI for playing against a trained AlphaZero agent.
+Interactive GUI for playing against a trained AlphaZero agent or pure MCTS.
 
 Usage:
     python scripts/play_gui.py --checkpoint checkpoints/checkpoint_1000.pt
     python scripts/play_gui.py --checkpoint checkpoints/checkpoint_1000.pt --simulations 800
     python scripts/play_gui.py --checkpoint checkpoints/checkpoint_1000.pt --human-first
+    python scripts/play_gui.py --mcts --simulations 800
+    python scripts/play_gui.py --mcts --human-first
 """
 
 import argparse
@@ -20,18 +22,22 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')
 from src.agent import Player
 from src.board import Board
 from src.alphazero.agent import AlphaZeroAgent
+from src.pure_mcts_agent import PureMCTSAgent
 from PySide6.QtWidgets import QApplication
 from main import GameWindow
 
 
 def main():
-    parser = argparse.ArgumentParser(description='Play Gomoku vs AlphaZero')
-    parser.add_argument('--checkpoint', type=str, required=True,
-                        help='Path to AlphaZero checkpoint')
+    parser = argparse.ArgumentParser(description='Play Gomoku vs an AI agent')
+    group = parser.add_mutually_exclusive_group(required=True)
+    group.add_argument('--checkpoint', type=str,
+                       help='Path to AlphaZero checkpoint')
+    group.add_argument('--mcts', action='store_true',
+                       help='Play against pure MCTS (no neural network)')
     parser.add_argument('--simulations', type=int, default=400,
                         help='MCTS simulations per move (default: 400)')
     parser.add_argument('--temperature', type=float, default=0.0,
-                        help='Temperature for AI moves (default: 0.0 = deterministic)')
+                        help='Temperature for AlphaZero moves (default: 0.0 = deterministic)')
     parser.add_argument('--batch-size', type=int, default=16,
                         help='MCTS batch size for GPU optimization (default: 16, use 1 to disable)')
     parser.add_argument('--human-first', action='store_true',
@@ -39,31 +45,40 @@ def main():
     args = parser.parse_args()
 
     print("\n" + "=" * 60)
-    print("Gomoku vs AlphaZero")
-    print("=" * 60)
 
-    # Load AlphaZero agent
-    print(f"\nLoading AlphaZero agent...")
-    print(f"  Checkpoint: {args.checkpoint}")
-    print(f"  MCTS simulations: {args.simulations}")
-    print(f"  Temperature: {args.temperature}")
-
-    alphazero = AlphaZeroAgent(
-        checkpoint_path=args.checkpoint,
-        num_simulations=args.simulations,
-        temperature=args.temperature,
-        batch_size=args.batch_size
-    )
+    if args.mcts:
+        print("Gomoku vs Pure MCTS")
+        print("=" * 60)
+        print(f"\nUsing Pure MCTS agent")
+        print(f"  Simulations: {args.simulations}")
+        ai = PureMCTSAgent(num_simulations=args.simulations)
+        ai_name = f"Pure MCTS (sims={args.simulations})"
+    else:
+        print("Gomoku vs AlphaZero")
+        print("=" * 60)
+        print(f"\nLoading AlphaZero agent...")
+        print(f"  Checkpoint: {args.checkpoint}")
+        print(f"  MCTS simulations: {args.simulations}")
+        print(f"  Temperature: {args.temperature}")
+        ai = AlphaZeroAgent(
+            checkpoint_path=args.checkpoint,
+            num_simulations=args.simulations,
+            temperature=args.temperature,
+            batch_size=args.batch_size
+        )
+        ai_name = f"AlphaZero ({os.path.basename(args.checkpoint)})"
 
     # Setup players
     human = Player()
     if args.human_first:
-        players = (human, alphazero)
+        players = (human, ai)
+        player_names = ("Human", ai_name)
         print(f"\nYou are playing as Player 1 (Red)")
-        print(f"AlphaZero is Player 2 (Blue)")
+        print(f"{ai_name} is Player 2 (Blue)")
     else:
-        players = (alphazero, human)
-        print(f"\nAlphaZero is Player 1 (Red)")
+        players = (ai, human)
+        player_names = (ai_name, "Human")
+        print(f"\n{ai_name} is Player 1 (Red)")
         print(f"You are playing as Player 2 (Blue)")
 
     print("\nStarting game...")
@@ -72,7 +87,7 @@ def main():
     # Start game
     board = Board()
     app = QApplication(sys.argv)
-    window = GameWindow(board, 9, players)
+    window = GameWindow(board, 9, players, player_names)
     window.show()
     sys.exit(app.exec())
 
