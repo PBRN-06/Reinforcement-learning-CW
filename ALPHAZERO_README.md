@@ -105,10 +105,6 @@ batch_size: 256          # Training batch size
 learning_rate: 0.001     # Adam learning rate
 epochs_per_iteration: 10 # Training epochs per iteration
 
-# Checkpointing
-checkpoint_freq: 10      # Save every N iterations
-```
-
 ### Generation Frequency Optimization
 
 The `generation_frequency` parameter controls how often new self-play games are generated:

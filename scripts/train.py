@@ -53,7 +53,6 @@ def main():
     print(f"  Self-play: {config.games_per_iteration} games per iteration")
     print(f"  Training: {config.epochs_per_iteration} epochs, batch size {config.batch_size}, recency fraction {config.recent_priority}")
     print(f"  Total iterations: {config.num_iterations}")
-    print(f"  Checkpoint frequency: every {config.checkpoint_freq} iterations")
 
     # Create trainer
     trainer = AlphaZeroTrainer(config)

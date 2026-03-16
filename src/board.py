@@ -2,8 +2,8 @@ import numpy as np
 from src.rewards import count_sequences
 
 class Board:
-    def __init__(self):
-        self.base = np.zeros([9,9])
+    def __init__(self, size=9):
+        self.base = np.zeros([size, size])
 
     def update(self, pos, index):
         if self.check_valid(pos):

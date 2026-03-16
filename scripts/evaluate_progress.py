@@ -33,6 +33,7 @@ from src.board import Board
 from src.alphazero.agent import AlphaZeroAgent
 from src.agent import RL_Agent
 from src.alphazero.utils import check_terminal
+from src.alphazero.config import AlphaZeroConfig
 
 
 def load_training_metrics(log_path: str = "./logs/training_metrics.json") -> List[Dict]:
@@ -110,7 +111,8 @@ def plot_loss_curves(metrics: List[Dict], output_path: str = "./logs/loss_curves
 
 def evaluate_checkpoint_vs_checkpoint(checkpoint1: str, checkpoint2: str,
                                        num_games: int = 20, num_simulations: int = 100,
-                                       verbose: bool = True, batch_size: int = 16) -> Dict:
+                                       verbose: bool = True, batch_size: int = 16,
+                                       board_size: int = 9) -> Dict:
     """
     Evaluate two checkpoints against each other.
 
@@ -139,7 +141,7 @@ def evaluate_checkpoint_vs_checkpoint(checkpoint1: str, checkpoint2: str,
         # Alternate starting player
         if i % 2 == 0:
             # Agent1 plays first
-            winner = play_game(agent1, agent2)
+            winner = play_game(agent1, agent2, board_size=board_size)
             if winner == 1:
                 wins += 1
             elif winner == 2:
@@ -148,7 +150,7 @@ def evaluate_checkpoint_vs_checkpoint(checkpoint1: str, checkpoint2: str,
                 draws += 1
         else:
             # Agent2 plays first, agent1 is player 2
-            winner = play_game(agent2, agent1)
+            winner = play_game(agent2, agent1, board_size=board_size)
             if winner == 2:
                 wins += 1
             elif winner == 1:
@@ -179,7 +181,7 @@ def evaluate_checkpoint_vs_checkpoint(checkpoint1: str, checkpoint2: str,
 
 def evaluate_checkpoint_vs_random(checkpoint_path: str, num_games: int = 20,
                                    num_simulations: int = 100, verbose: bool = True,
-                                   batch_size: int = 16) -> Dict:
+                                   batch_size: int = 16, board_size: int = 9) -> Dict:
     """
     Evaluate a checkpoint against random agent.
 
@@ -212,7 +214,7 @@ def evaluate_checkpoint_vs_random(checkpoint_path: str, num_games: int = 20,
         # Alternate who plays first
         if i % 2 == 0:
             # AlphaZero plays first (Player 1)
-            winner = play_game(agent, random_agent)
+            winner = play_game(agent, random_agent, board_size=board_size)
             if winner == 1:
                 wins += 1
             elif winner == 2:
@@ -221,7 +223,7 @@ def evaluate_checkpoint_vs_random(checkpoint_path: str, num_games: int = 20,
                 draws += 1
         else:
             # Random plays first (Player 1), AlphaZero is Player 2
-            winner = play_game(random_agent, agent)
+            winner = play_game(random_agent, agent, board_size=board_size)
             if winner == 2:
                 wins += 1
             elif winner == 1:
@@ -250,23 +252,24 @@ def evaluate_checkpoint_vs_random(checkpoint_path: str, num_games: int = 20,
     }
 
 
-def play_game(agent1, agent2) -> int:
+def play_game(agent1, agent2, board_size: int = 9) -> int:
     """
     Play one game between two agents.
 
     Args:
         agent1: First agent (Player 1)
         agent2: Second agent (Player 2)
+        board_size: Size of the board
 
     Returns:
         Winner (1, 2, or 0 for draw)
     """
-    board = Board()
+    board = Board(board_size)
     agents = [agent1, agent2]
     current_player = 0
     move_count = 0
 
-    while not board.check_win() and move_count < 81:
+    while not board.check_win() and move_count < board_size ** 2:
         # Get move from current agent
         move = agents[current_player].command(board, 0)
 
@@ -496,7 +499,11 @@ def main():
                         help='Evaluate against random agent instead of checkpoint-vs-checkpoint (less meaningful)')
     parser.add_argument('--baseline', type=int, default=None,
                         help='Baseline checkpoint for comparison (default: first checkpoint)')
+    parser.add_argument('--config', type=str, default='config.yaml',
+                        help='Path to configuration file (default: config.yaml)')
     args = parser.parse_args()
+
+    config = AlphaZeroConfig.from_yaml(args.config)
 
     print("\n" + "=" * 80)
     print("AlphaZero Training Progress Evaluation")
@@ -569,7 +576,8 @@ def main():
                     num_games=args.games,
                     num_simulations=args.simulations,
                     verbose=True,
-                    batch_size=args.batch_size
+                    batch_size=args.batch_size,
+                    board_size=config.board_size
                 )
 
                 results['iteration'] = iteration
@@ -620,7 +628,8 @@ def main():
                     num_games=args.games,
                     num_simulations=args.simulations,
                     verbose=True,
-                    batch_size=args.batch_size
+                    batch_size=args.batch_size,
+                    board_size=config.board_size
                 )
 
                 results['iteration'] = iteration

@@ -280,9 +280,10 @@ class AlphaZeroTrainer:
         states = torch.FloatTensor(batch['states'])
         
         # Encode
-        encoded = torch.zeros(batch_size, 3, 9, 9)
+        bs = self.config.board_size
+        encoded = torch.zeros(batch_size, 3, bs, bs)
         for i in range(batch_size):
-            encoded[i] = torch.from_numpy(encode_board_state(states[i].numpy(), 9))
+            encoded[i] = torch.from_numpy(encode_board_state(states[i].numpy(), bs))
         encoded = encoded.to(device)
         
         policies = torch.FloatTensor(batch['policies']).to(device)

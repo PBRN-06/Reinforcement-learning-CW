@@ -34,7 +34,6 @@ reward_shaping_weight: 0  # Weight for shaped rewards (0.0=disabled)
 replay_buffer_size: 500000  # Maximum examples to keep in buffer
 
 # Checkpointing
-checkpoint_freq: 10       # Save checkpoint every N iterations
 checkpoint_dir: "./checkpoints"
 
 # Evaluation

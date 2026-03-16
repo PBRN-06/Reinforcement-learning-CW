@@ -1,6 +1,7 @@
 from src.agent import *
 from src.board import Board
 from src.rewards import calculate_reward
+from src.alphazero.config import AlphaZeroConfig
 
 from PySide6.QtWidgets import QApplication, QMainWindow, QWidget, QGridLayout, QPushButton, QHBoxLayout, QMessageBox
 from PySide6.QtCore import Qt
@@ -9,7 +10,8 @@ import sys
 from typing import Literal
 
 #game loop
-board = Board()
+_config = AlphaZeroConfig.from_yaml("config.yaml")
+board = Board(_config.board_size)
 players = (Player(), RL_Agent())
 
 game_running = True
@@ -114,7 +116,7 @@ class GameWindow(QMainWindow):
 
 try:
   app = QApplication()
-  window = GameWindow(board, 9, players)
+  window = GameWindow(board, _config.board_size, players)
 
   window.show()
   sys.exit(app.exec())

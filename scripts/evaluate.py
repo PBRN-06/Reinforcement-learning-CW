@@ -27,7 +27,7 @@ from src.alphazero.utils import check_terminal
 from src.alphazero.config import AlphaZeroConfig
 
 
-def play_game(agent1, agent2, verbose: bool = False):
+def play_game(agent1, agent2, verbose: bool = False, board_size: int = 9):
     """
     Play one game between two agents.
 
@@ -35,11 +35,12 @@ def play_game(agent1, agent2, verbose: bool = False):
         agent1: First agent (plays as Player 1)
         agent2: Second agent (plays as Player 2)
         verbose: Whether to print game progress
+        board_size: Size of the board
 
     Returns:
         Winner (1, 2, or 0 for draw)
     """
-    board = Board()
+    board = Board(board_size)
     agents = [agent1, agent2]
     current_player = 0
     move_count = 0
@@ -49,7 +50,7 @@ def play_game(agent1, agent2, verbose: bool = False):
         print("Starting new game")
         print("=" * 40)
 
-    while not board.check_win() and move_count < 81:
+    while not board.check_win() and move_count < board_size ** 2:
         # Get move from current agent
         move = agents[current_player].command(board, 0)
 
@@ -95,9 +96,11 @@ def main():
                         help='MCTS batch size for GPU optimization (default: 16, use 1 to disable)')
     parser.add_argument('--verbose', action='store_true',
                         help='Print detailed game information')
+    parser.add_argument('--config', type=str, default='config.yaml',
+                        help='Path to configuration file (default: config.yaml)')
     args = parser.parse_args()
 
-    config = AlphaZeroConfig.from_yaml("config.yaml")
+    config = AlphaZeroConfig.from_yaml(args.config)
 
     # Load agents
     print("\n" + "=" * 60)
@@ -150,10 +153,10 @@ def main():
         # Alternate starting player
         if i % 2 == 0:
             # agent1 plays first
-            winner = play_game(agent1, agent2, verbose=args.verbose)
+            winner = play_game(agent1, agent2, verbose=args.verbose, board_size=config.board_size)
         else:
             # agent2 plays first
-            winner = play_game(agent2, agent1, verbose=args.verbose)
+            winner = play_game(agent2, agent1, verbose=args.verbose, board_size=config.board_size)
             # Swap winner perspective
             if winner == 1:
                 winner = 2

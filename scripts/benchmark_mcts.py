@@ -26,7 +26,7 @@ from src.alphazero.mcts_batched import BatchedMCTS
 from src.alphazero.config import AlphaZeroConfig
 
 
-def benchmark_mcts_mode(network, mcts_class, config_kwargs, num_games: int = 10):
+def benchmark_mcts_mode(network, mcts_class, config_kwargs, num_games: int = 10, board_size: int = 9):
     """
     Benchmark a specific MCTS configuration.
 
@@ -44,7 +44,6 @@ def benchmark_mcts_mode(network, mcts_class, config_kwargs, num_games: int = 10)
 
     # Run games
     total_time = 0.0
-    board_size = 9
 
     for _ in range(num_games):
         # Random starting position (simulate mid-game)
@@ -80,6 +79,8 @@ def main():
                         help='Number of games to average (default: 10)')
     parser.add_argument('--checkpoint', type=str, default=None,
                         help='Load network from checkpoint (optional)')
+    parser.add_argument('--config', type=str, default='config.yaml',
+                        help='Path to configuration file (default: config.yaml)')
     args = parser.parse_args()
 
     print("\n" + "=" * 80)
@@ -92,7 +93,7 @@ def main():
     print("=" * 80 + "\n")
 
     # Create network
-    config = AlphaZeroConfig()
+    config = AlphaZeroConfig.from_yaml(args.config)
     network = AlphaZeroNetwork(
         num_res_blocks=config.num_res_blocks,
         num_filters=config.num_filters,
@@ -132,7 +133,8 @@ def main():
             'dirichlet_alpha': 0.3,
             'dirichlet_epsilon': 0.25
         },
-        num_games=args.games
+        num_games=args.games,
+        board_size=config.board_size
     )
 
     results.append({
@@ -157,7 +159,8 @@ def main():
                 'dirichlet_alpha': 0.3,
                 'dirichlet_epsilon': 0.25
             },
-            num_games=args.games
+            num_games=args.games,
+            board_size=config.board_size
         )
 
         speedup = sequential_time / batched_time

@@ -31,7 +31,7 @@ class AlphaZeroConfig:
     games_per_iteration: int = 100
     num_workers: int = 4
     generation_frequency: int = 1  # Generate new games every N iterations (1=every iteration, 5=every 5th)
-    random_opening_moves: int = 10  # Number of random moves at game start (adaptive decay based on iteration)
+    random_opening_moves: int = 0  # kept for backward compatability
 
     # Opponent selection strategy with adaptive rolloff
     # Ratios adapt based on checkpoint pool size:
@@ -51,13 +51,13 @@ class AlphaZeroConfig:
     learning_rate: float = 1e-3
     weight_decay: float = 1e-4
     grad_clip: float = 5.0
-    reward_shaping_weight: float = 0.0  # Weight for intermediate reward shaping (0.0=disabled, 0.1=recommended)
+    reward_shaping_weight: float = 0.0  # kept for backward compatibility
 
     # Replay buffer
     replay_buffer_size: int = 500000
 
     # Checkpointing
-    checkpoint_freq: int = 10
+    checkpoint_freq: int = 10 # Kept for backward compat.
     checkpoint_dir: str = "./checkpoints"
 
     # Evaluation

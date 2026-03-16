@@ -22,6 +22,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')
 from src.agent import Player
 from src.board import Board
 from src.alphazero.agent import AlphaZeroAgent
+from src.alphazero.config import AlphaZeroConfig
 from src.pure_mcts_agent import PureMCTSAgent
 from PySide6.QtWidgets import QApplication
 from main import GameWindow
@@ -42,7 +43,11 @@ def main():
                         help='MCTS batch size for GPU optimization (default: 16, use 1 to disable)')
     parser.add_argument('--human-first', action='store_true',
                         help='Human plays first (default: AI plays first)')
+    parser.add_argument('--config', type=str, default='config.yaml',
+                        help='Path to configuration file (default: config.yaml)')
     args = parser.parse_args()
+
+    config = AlphaZeroConfig.from_yaml(args.config)
 
     print("\n" + "=" * 60)
 
@@ -85,9 +90,9 @@ def main():
     print("=" * 60 + "\n")
 
     # Start game
-    board = Board()
+    board = Board(config.board_size)
     app = QApplication(sys.argv)
-    window = GameWindow(board, 9, players, player_names)
+    window = GameWindow(board, config.board_size, players, player_names)
     window.show()
     sys.exit(app.exec())
 

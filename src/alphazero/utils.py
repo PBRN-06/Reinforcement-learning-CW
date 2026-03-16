@@ -123,7 +123,7 @@ def get_canonical_board(board_state: np.ndarray, player: int) -> np.ndarray:
         return canonical
 
 
-def check_terminal(board_state: np.ndarray, board_size: int = 9) -> int | None:
+def check_terminal(board_state: np.ndarray, board_size: int = None) -> int | None:
     """
     Check if game is terminal and return winner.
 
@@ -134,6 +134,9 @@ def check_terminal(board_state: np.ndarray, board_size: int = 9) -> int | None:
     Returns:
         0 (draw), 1 (player 1 wins), 2 (player 2 wins), or None (not terminal)
     """
+    if board_size is None:
+        board_size = board_state.shape[0]
+
     # Check Player 1
     seqs = count_sequences(board_state, 1, board_size)
     if seqs[5] >= 1:
