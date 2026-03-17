@@ -130,28 +130,7 @@ The `generation_frequency` parameter controls how often new self-play games are 
 
 The training system includes powerful GPU optimizations for **6-20x faster training**!
 
-### 1. Random Opening Moves (Enabled by Default)
-
-Skip expensive MCTS for the first N moves, using instant random selection instead.
-
-```yaml
-random_opening_moves: 10  # Default: 10
-```
-
-**Adaptive Schedule:**
-- Iterations 1-300 (30%): 10 random moves
-- Iterations 301-600 (60%): 5 random moves
-- Iterations 601-800 (80%): 2 random moves
-- Iterations 801+ (100%): 0 random moves (full MCTS)
-
-**Benefits:**
-- 3-5x speedup during early training
-- Network focuses on critical mid/late-game positions
-- Gradually phases out as network learns opening theory
-
-**Speedup**: Saves ~400,000 simulations per iteration early on!
-
-### 2. Batched MCTS Evaluation (NEW!)
+### 1. Batched MCTS Evaluation (NEW!)
 
 Batch multiple GPU evaluations together for better utilization.
 
@@ -216,7 +195,6 @@ With both optimizations enabled:
 ```yaml
 # GPU Optimizations
 mcts_batch_size: 16          # Batched MCTS evaluation
-random_opening_moves: 10      # Random openings for speed
 
 # MCTS
 num_simulations: 400          # Standard strength
@@ -233,7 +211,6 @@ learning_rate: 0.001
 ```yaml
 # CPU-Optimized
 mcts_batch_size: 1            # Disable batching (less benefit)
-random_opening_moves: 15      # More aggressive for speed
 
 # MCTS
 num_simulations: 200          # Fewer sims
@@ -250,7 +227,6 @@ learning_rate: 0.001
 ```yaml
 # Quality-Focused
 mcts_batch_size: 32           # Large batches
-random_opening_moves: 5       # Less random
 
 # MCTS
 num_simulations: 800          # Strong search

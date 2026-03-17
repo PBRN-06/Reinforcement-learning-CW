@@ -29,9 +29,7 @@ class AlphaZeroConfig:
 
     # Self-play
     games_per_iteration: int = 100
-    num_workers: int = 4
     generation_frequency: int = 1  # Generate new games every N iterations (1=every iteration, 5=every 5th)
-    random_opening_moves: int = 0  # kept for backward compatability
 
     # Opponent selection strategy with adaptive rolloff
     # Ratios adapt based on checkpoint pool size:

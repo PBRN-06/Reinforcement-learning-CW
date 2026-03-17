@@ -85,26 +85,6 @@ class SelfPlayWorker:
 
         self.board_size = config.board_size
 
-    def _get_random_moves_count(self, iteration: int) -> int:
-        """
-        Calculate number of random opening moves based on training iteration.
-        Implements adaptive decay schedule for faster early training.
-
-        Args:
-            iteration: Current training iteration
-
-        Returns:
-            Number of random moves to use at game start
-        """
-        max_random = self.config.random_opening_moves
-        max_iterations = self.config.num_iterations
-        
-        # Linear decay from max_random to 0 over full training
-        progress = min(iteration / max_iterations, 1.0)
-        decay = 1.0 - progress
-        
-        return max(int(max_random * decay), 0)
-
     def _get_temperature(self, move_count: int, iteration: int) -> float:
         """
         Calculate temperature for move sampling with adaptive decay.
@@ -155,68 +135,57 @@ class SelfPlayWorker:
         move_count = 0
         max_moves = self.board_size * self.board_size
 
-        # Determine number of random opening moves (for speedup)
-        num_random_moves = self._get_random_moves_count(current_iteration)
-
         while move_count < max_moves:
-            # Check if we're in random opening phase
-            if move_count < num_random_moves:
-                # Random opening move (no MCTS, no training data)
-                legal_moves = get_legal_moves(board)
-                if len(legal_moves) == 0:
-                    break  # Board full (draw)
-                action = np.random.choice(legal_moves)
+            # Normal MCTS-guided move
+            # Get canonical board (current player always sees themselves as 1)
+            canonical_board = get_canonical_board(board, current_player)
+
+            # Determine temperature with adaptive decay
+            temperature = self._get_temperature(move_count, current_iteration)
+
+            # Choose which MCTS to use based on current player
+            # Player 1 always uses main network
+            # Player 2 uses opponent network if available, otherwise uses main (self-play)
+            if current_player == 2 and self.opponent_mcts is not None:
+                # Play against past checkpoint
+                mcts_policy, _ = self.opponent_mcts.search(
+                    canonical_board,
+                    current_player=1,  # Always 1 in canonical form
+                    add_noise=False,   # Stable target
+                    temperature=0.1    #  "
+                )
             else:
-                # Normal MCTS-guided move
-                # Get canonical board (current player always sees themselves as 1)
-                canonical_board = get_canonical_board(board, current_player)
+                # Self-play or player 1 move
+                mcts_policy, _ = self.mcts.search(
+                    canonical_board,
+                    current_player=1,  # Always 1 in canonical form
+                    add_noise=True,
+                    temperature=temperature
+                )
 
-                # Determine temperature with adaptive decay
-                temperature = self._get_temperature(move_count, current_iteration)
+            # Store training example (before making move), ignoring checkpoint agents since those are fixed
+            is_checkpoint_opponent_move = (current_player == 2 and self.opponent_mcts is not None)
 
-                # Choose which MCTS to use based on current player
-                # Player 1 always uses main network
-                # Player 2 uses opponent network if available, otherwise uses main (self-play)
-                if current_player == 2 and self.opponent_mcts is not None:
-                    # Play against past checkpoint
-                    mcts_policy, _ = self.opponent_mcts.search(
-                        canonical_board,
-                        current_player=1,  # Always 1 in canonical form
-                        add_noise=False,   # Stable target
-                        temperature=0.1    #  "
-                    )
-                else:
-                    # Self-play or player 1 move
-                    mcts_policy, _ = self.mcts.search(
-                        canonical_board,
-                        current_player=1,  # Always 1 in canonical form
-                        add_noise=True,
-                        temperature=temperature
-                    )
+            if not is_checkpoint_opponent_move:
+                examples.append({
+                    'state': canonical_board.copy(),
+                    'policy': mcts_policy.copy(),
+                    'player': current_player
+                })
 
-                # Store training example (before making move), ignoring checkpoint agents since those are fixed
-                is_checkpoint_opponent_move = (current_player == 2 and self.opponent_mcts is not None)
+            # Sample action from MCTS policy
+            legal_moves = get_legal_moves(board)
+            if len(legal_moves) == 0:
+                break  # Board full (draw)
 
-                if not is_checkpoint_opponent_move:
-                    examples.append({
-                        'state': canonical_board.copy(),
-                        'policy': mcts_policy.copy(),
-                        'player': current_player
-                    })
-
-                # Sample action from MCTS policy
-                legal_moves = get_legal_moves(board)
-                if len(legal_moves) == 0:
-                    break  # Board full (draw)
-
-                # Normalize policy over legal moves only
-                legal_policy = mcts_policy[legal_moves]
-                if np.sum(legal_policy) > 0:
-                    legal_policy = legal_policy / np.sum(legal_policy)
-                    action = np.random.choice(legal_moves, p=legal_policy)
-                else:
-                    # Fallback to uniform random
-                    action = np.random.choice(legal_moves)
+            # Normalize policy over legal moves only
+            legal_policy = mcts_policy[legal_moves]
+            if np.sum(legal_policy) > 0:
+                legal_policy = legal_policy / np.sum(legal_policy)
+                action = np.random.choice(legal_moves, p=legal_policy)
+            else:
+                # Fallback to uniform random
+                action = np.random.choice(legal_moves)
 
             # Apply action
             board = apply_action(board, action, current_player)

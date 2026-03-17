@@ -82,24 +82,6 @@ class AlphaZeroTrainer:
         self.metrics_log_path = os.path.join(config.log_dir, "training_metrics.json")
         self.metrics_history = []
 
-    def _get_random_moves_count(self, iteration: int) -> int:
-        """
-        Calculate number of random opening moves based on training iteration.
-        Implements adaptive decay schedule for faster early training.
-
-        Args:
-            iteration: Current training iteration
-
-        Returns:
-            Number of random moves to use at game start
-        """
-        max_random = self.config.random_opening_moves
-        max_iterations = self.config.num_iterations
-
-        # Faster decay - reach 0 by 20% of max iterations
-        progress = min(iteration / (max_iterations * 0.2), 1.0)
-        return max(int(max_random * (1.0 - progress)), 0)
-
     def train(self):
         """Main training loop."""
         print(f"\n{'=' * 60}")
@@ -133,13 +115,7 @@ class AlphaZeroTrainer:
 
             if should_generate:
                 # Calculate random opening moves for this iteration
-                num_random_moves = self._get_random_moves_count(self.iteration)
-                if num_random_moves > 0:
-                    print(f"\n[1/3] Generating {self.config.games_per_iteration} self-play games...")
-                    print(f"      Using {num_random_moves} random opening moves for speedup")
-                else:
-                    print(f"\n[1/3] Generating {self.config.games_per_iteration} self-play games...")
-                    print(f"      Using full MCTS from move 1 (no random openings)")
+                print(f"\n[1/3] Generating {self.config.games_per_iteration} self-play games...")
 
                 self_play_manager = SelfPlayManager(self.network, self.config)
                 examples = self_play_manager.generate_games(

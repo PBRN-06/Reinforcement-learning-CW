@@ -135,7 +135,9 @@ def main():
             checkpoint_path=args.agent2,
             num_simulations=args.simulations,
             temperature=args.temperature,
-            batch_size=args.batch_size
+            batch_size=args.batch_size,
+            num_res_blocks=config.num_res_blocks,
+            num_filters=config.num_filters
         )
         agent2_name = f"AlphaZero({os.path.basename(args.agent2)})"
 
