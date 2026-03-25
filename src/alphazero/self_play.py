@@ -470,14 +470,21 @@ class SelfPlayManager:
             else:
                 return 'random'
 
-        else:
-            # Full pool - standard distribution
+        elif pool_size < 15:
+            # Medium pool - standard distribution
             if roll < 0.2:
                 return 'self_play'
             elif roll < 0.8:
                 return 'pool'
             else:
                 return 'random'
+
+        else:
+            # Full pool (>=15) - no random opponents, they produce unrealistic positions
+            if roll < 0.2:
+                return 'self_play'
+            else:
+                return 'pool'
 
     def generate_games(self, num_games: int, current_iteration: int = 1):
         """
@@ -529,8 +536,10 @@ class SelfPlayManager:
             dist_msg = "70% self-play, 30% random (no checkpoints)"
         elif pool_size < 5:
             dist_msg = f"40% self-play, 30% pool ({pool_size} ckpts), 30% random"
-        else:
+        elif pool_size < 15:
             dist_msg = f"20% self-play, 60% pool ({pool_size} ckpts), 20% random"
+        else:
+            dist_msg = f"20% self-play, 80% pool ({pool_size} ckpts), 0% random"
 
         print(f"  Opponent distribution: {dist_msg}")
 

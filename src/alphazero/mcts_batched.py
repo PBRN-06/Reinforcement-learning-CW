@@ -10,7 +10,7 @@ import math
 from src.alphazero.mcts import MCTSNode
 from src.alphazero.utils import (
     get_legal_moves, apply_action, check_terminal,
-    get_terminal_value, create_valid_move_mask
+    get_terminal_value, create_valid_move_mask, get_canonical_board
 )
 
 
@@ -125,22 +125,24 @@ class BatchedMCTS:
 
             # Batch evaluate non-terminal leaves
             if non_terminal_leaves:
-                states = [d['state'] for d in non_terminal_leaves]
-                policies_batch, values_batch = self.network.predict_batch(states)
+                # Canonicalize boards so network always sees current player as 1
+                canonical_states = [get_canonical_board(d['state'], d['player'])
+                                    for d in non_terminal_leaves]
+                policies_batch, values_batch = self.network.predict_batch(canonical_states)
 
                 # Expand and store values for non-terminal leaves
                 for i, data in enumerate(non_terminal_leaves):
                     policy_probs = policies_batch[i]
                     value = values_batch[i]
-                    
+
                     legal_moves = get_legal_moves(data['state'])
                     action_priors = {action: policy_probs[action] for action in legal_moves}
                     prior_sum = sum(action_priors.values())
                     if prior_sum > 0:
                         action_priors = {a: p / prior_sum for a, p in action_priors.items()}
-                    
+
                     data['node'].expand(action_priors)
-                    data['value'] = value  # already from data['player']'s perspective
+                    data['value'] = value  # from leaf player's perspective (canonical evaluation)
 
             # For terminal leaves
             for data in terminal_leaves:

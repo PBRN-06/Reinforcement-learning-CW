@@ -8,7 +8,7 @@ import numpy as np
 import math
 from src.alphazero.utils import (
     get_legal_moves, apply_action, check_terminal,
-    get_terminal_value, create_valid_move_mask
+    get_terminal_value, create_valid_move_mask, get_canonical_board
 )
 
 
@@ -153,7 +153,9 @@ class MCTS:
                 value = get_terminal_value(winner, player)
             else:
                 # Non-terminal - expand and evaluate with network
-                policy_probs, value = self.network.predict(state)
+                # Canonicalize so network always sees current player as 1
+                canonical_state = get_canonical_board(state, player)
+                policy_probs, value = self.network.predict(canonical_state)
                 legal_moves = get_legal_moves(state)
                 action_priors = {action: policy_probs[action] for action in legal_moves}
 
@@ -197,35 +199,13 @@ class MCTS:
         Args:
             search_path: List of nodes from root to leaf
             value: Value to backpropagate (from leaf player's perspective)
-            root_player: Player at root node
+            root_player: Player at root node (unused after canonicalization fix)
         """
-        # The value alternates sign as we go up the tree
-        # because each level represents a different player
-        current_player = root_player
-
-        # We need to traverse the path backwards and flip value for each level
-        # The search_path[0] is root (current player)
-        # search_path[-1] is the expanded leaf
-
-        # Calculate how many moves were made to reach the leaf
-        depth = len(search_path) - 1
-
-        # If depth is even, leaf player == root player
-        # If depth is odd, leaf player != root player
-        if depth % 2 == 0:
-            # Same player, value stays positive
-            leaf_value = value
-        else:
-            # Different player, flip value
-            leaf_value = -value
-
-        # Now backpropagate, flipping value at each step
-        for i, node in enumerate(reversed(search_path)):
-            # Alternate value sign based on depth from leaf
-            if i % 2 == 0:
-                node.update(leaf_value)
-            else:
-                node.update(-leaf_value)
+        # Value is from the leaf player's perspective (thanks to canonical evaluation).
+        # Alternate sign at each level since each represents a different player.
+        for node in reversed(search_path):
+            node.update(value)
+            value = -value
 
     def _get_action_probs(self, root: MCTSNode, board_size: int, temperature: float):
         """

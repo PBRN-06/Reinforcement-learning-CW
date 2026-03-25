@@ -371,8 +371,7 @@ class AlphaZeroTrainer:
                 policy_loss = self._policy_loss(policy_logits, policy_targets, mask)
                 value_loss = self._value_loss(value_pred, value_targets)
                 net_entropy, target_entropy = self._entropy(policy_logits, policy_targets, mask)
-                # Weight value loss
-                loss = policy_loss + 0.5 * value_loss
+                loss = policy_loss + value_loss
 
                 # Backward pass
                 self.optimizer.zero_grad()

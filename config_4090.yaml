@@ -1,4 +1,4 @@
-# AlphaZero Configuration for Gomoku (9x9, 5-in-a-row) — 3050 Ti
+# AlphaZero Configuration for Gomoku (9x9, 5-in-a-row) — 4090
 
 # Network Architecture
 num_res_blocks: 10
@@ -20,12 +20,12 @@ generation_frequency: 1   # Generate new games every N iterations (1 = fresh dat
 
 # Training
 num_iterations: 500       # Total training iterations
-epochs_per_iteration: 10  # Training epochs per iteration
-batch_size: 128           # Training batch size (adjust for GPU memory)
+epochs_per_iteration: 15  # Training epochs per iteration (more epochs to utilise GPU)
+batch_size: 512           # Larger batch to saturate 4090 compute (24GB VRAM)
 recent_priority: 0.6      # Fraction of batch to bias to recent examples, rest is uniform from whole buffer
 learning_rate: 0.001      # Adam learning rate
 weight_decay: 0.0001      # L2 regularization
-grad_clip: 1.0            # Gradient clipping norm
+grad_clip: 2.0            # Higher clip OK with larger batch (smoother gradients)
 reward_shaping_weight: 0  # Weight for shaped rewards (0.0=disabled)
 
 # Replay Buffer
