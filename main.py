@@ -114,11 +114,12 @@ class GameWindow(QMainWindow):
     msg.setStandardButtons(QMessageBox.StandardButton.Ok)
     msg.exec()
 
-try:
-  app = QApplication()
-  window = GameWindow(board, _config.board_size, players)
+if __name__ == "__main__":
+  try:
+    app = QApplication()
+    window = GameWindow(board, _config.board_size, players)
 
-  window.show()
-  sys.exit(app.exec())
-except Exception as e:
-    print(f"Application error: {e}")
+    window.show()
+    sys.exit(app.exec())
+  except Exception as e:
+      print(f"Application error: {e}")
