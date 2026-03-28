@@ -16,7 +16,6 @@ temperature_low: 0.1         # Low temperature for exploitation
 
 # Self-Play
 games_per_iteration: 100     # Games to generate per training iteration
-num_workers: 4               # Parallel workers for self-play generation
 generation_frequency: 1      # Generate new games every N iterations
 past_opponent_ratio: 0.5     # Fraction of games vs past checkpoint
 
