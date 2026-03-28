@@ -9,13 +9,6 @@ import numpy as np
 import sys
 from typing import Literal
 
-#game loop
-_config = AlphaZeroConfig.from_yaml("config.yaml")
-board = Board(_config.board_size)
-players = (Player(), RL_Agent())
-
-game_running = True
-
 class GameWindow(QMainWindow):
   square_size = 64
   margin = 4
@@ -68,7 +61,7 @@ class GameWindow(QMainWindow):
   
   def update_game(self):
     cmd = self.players[self.current_player].command(
-      self.board, calculate_reward(board.base, self.current_player + 1))
+      self.board, calculate_reward(self.board.base, self.current_player + 1))
     if cmd:
       self.board.update(cmd, self.current_player + 1)
       self.player_complete()
@@ -115,6 +108,13 @@ class GameWindow(QMainWindow):
     msg.exec()
 
 if __name__ == "__main__":
+  #game loop
+  _config = AlphaZeroConfig.from_yaml("config.yaml")
+  board = Board(_config.board_size)
+  players = (Player(), RL_Agent())
+
+  game_running = True
+
   try:
     app = QApplication()
     window = GameWindow(board, _config.board_size, players)
