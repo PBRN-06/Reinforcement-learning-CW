@@ -164,8 +164,8 @@ def compute_elo_ratings(checkpoints: List[Tuple[int, str]], num_games: int,
             iter_b, path_b = checkpoints[j]
             matchup_num += 1
 
-            print(f"  Elo matchup {matchup_num}/{total_matchups}: "
-                  f"iter {iter_a} vs iter {iter_b}", end="")
+            print(f"Elo matchup {matchup_num}/{total_matchups}: "
+                  f"iter {iter_a} vs iter {iter_b}")
 
             agent_a = AlphaZeroAgent(
                 checkpoint_path=path_a,
@@ -218,7 +218,7 @@ def compute_elo_ratings(checkpoints: List[Tuple[int, str]], num_games: int,
             ratings[iter_b] += K * (score_b - expected_b)
 
             print(f" -> {wins_a}W/{wins_b}L/{draws}D "
-                  f"(Elo: {ratings[iter_a]:.0f} / {ratings[iter_b]:.0f})")
+                  f"(Elo: {ratings[iter_a]:.0f} / {ratings[iter_b]:.0f})\n")
 
     return {k: round(v, 1) for k, v in ratings.items()}
 
