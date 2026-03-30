@@ -65,9 +65,10 @@ class PureMCTSAgent(Agent):
 
     def command(self, board: Board, reward) -> tuple[int, int]:
         board_state = board.base.copy()
+        board_size = board_state.shape[0]
         player = self._get_current_player(board_state)
         action = self._search(board_state, player)
-        return action_to_coords(action)
+        return action_to_coords(action, board_size)
 
     # ------------------------------------------------------------------
     # Internal helpers
