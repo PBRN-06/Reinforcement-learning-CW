@@ -1,4 +1,6 @@
 __pycache__/
 .vscode/
 
+**/replay_buffer*
+
 */old/
