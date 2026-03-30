@@ -1,0 +1,46 @@
+# AlphaZero Configuration for Gomoku (5x5, 5-in-a-row)
+
+# Network Architecture
+num_res_blocks: 5            # Fewer blocks — smaller board needs less capacity
+num_filters: 32              # Fewer filters for smaller board
+
+# MCTS Parameters
+num_simulations: 200         # 200-800 (more = stronger but slower)
+c_puct: 1.0                  # Exploration constant for UCB
+mcts_batch_size: 32          # GPU batching
+dirichlet_alpha: 0.3         # Noise concentration (higher for smaller action space)
+dirichlet_epsilon: 0.25      # Noise mixing ratio (75% network, 25% noise)
+temperature_threshold: 5     # Move number to switch from high to low temperature (shorter games)
+temperature_high: 1.0        # High temperature for exploration
+temperature_low: 0.1         # Low temperature for exploitation
+
+# Self-Play
+games_per_iteration: 100     # Games to generate per training iteration
+generation_frequency: 1      # Generate new games every N iterations
+past_opponent_ratio: 0.5     # Fraction of games vs past checkpoint
+
+# Training
+num_iterations: 500          # Total training iterations
+epochs_per_iteration: 10     # Training epochs per iteration
+batch_size: 256              # Training batch size
+recent_priority: 0.6         # Fraction of batch to bias to recent examples
+learning_rate: 0.001         # Adam learning rate
+weight_decay: 0.0001         # L2 regularization
+grad_clip: 1.0               # Gradient clipping norm
+
+# Replay Buffer
+replay_buffer_size: 500000   # Maximum examples to keep in buffer
+
+# Checkpointing
+checkpoint_dir: "./checkpoints_5x5"
+
+# Evaluation
+eval_freq: 50                # Evaluate every N iterations
+eval_games: 20               # Number of games for evaluation
+
+# Logging
+log_dir: "./logs_5x5"
+
+# Board Settings
+board_size: 5
+win_length: 5

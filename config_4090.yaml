@@ -1,0 +1,49 @@
+# AlphaZero Configuration for Gomoku (9x9, 5-in-a-row) — 4090
+
+# Network Architecture
+num_res_blocks: 10
+num_filters: 64          # 64-128 filters
+
+# MCTS Parameters
+num_simulations: 400     # 200-800 (more = stronger but slower)
+c_puct: 1.0              # Exploration constant for UCB
+mcts_batch_size: 32      # GPU batching
+dirichlet_alpha: 0.1     # Noise concentration (scaled for 9x9 board)
+dirichlet_epsilon: 0.25  # Noise mixing ratio (75% network, 25% noise)
+temperature_threshold: 15 # Move number to switch from high to low temperature
+temperature_high: 1.0    # High temperature for exploration (decays over training)
+temperature_low: 0.1     # Low temperature for exploitation
+
+# Self-Play
+games_per_iteration: 100  # Games to generate per training iteration
+generation_frequency: 1   # Generate new games every N iterations (1 = fresh data every iteration, prevents stale distribution)
+
+# Training
+num_iterations: 500       # Total training iterations
+epochs_per_iteration: 15  # Training epochs per iteration (more epochs to utilise GPU)
+batch_size: 512           # Larger batch to saturate 4090 compute (24GB VRAM)
+recent_priority: 0.6      # Fraction of batch to bias to recent examples, rest is uniform from whole buffer
+learning_rate: 0.001      # Adam learning rate
+weight_decay: 0.0001      # L2 regularization
+grad_clip: 2.0            # Higher clip OK with larger batch (smoother gradients)
+reward_shaping_weight: 0  # Weight for shaped rewards (0.0=disabled)
+
+# Replay Buffer
+replay_buffer_size: 500000  # Maximum examples to keep in buffer
+
+# Checkpointing
+checkpoint_dir: "./checkpoints"
+
+# Evaluation
+eval_freq: 50             # Evaluate every N iterations
+eval_games: 20            # Number of games for evaluation
+
+# Logging
+log_dir: "./logs"
+
+# Device
+device: "cuda"  # "cuda" or "cpu"
+
+# Board Settings
+board_size: 9
+win_length: 5
