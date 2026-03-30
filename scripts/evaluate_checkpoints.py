@@ -220,6 +220,11 @@ def compute_elo_ratings(checkpoints: List[Tuple[int, str]], num_games: int,
             print(f" -> {wins_a}W/{wins_b}L/{draws}D "
                   f"(Elo: {ratings[iter_a]:.0f} / {ratings[iter_b]:.0f})\n")
             
+
+    return {k: round(v, 1) for k, v in ratings.items()}
+
+
+def main():
     parser = argparse.ArgumentParser(description='Batch checkpoint evaluation')
     parser.add_argument('--checkpoint-dir', type=str, default='./checkpoints',
                         help='Checkpoint directory (default: ./checkpoints)')
