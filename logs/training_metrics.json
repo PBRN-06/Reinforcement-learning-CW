@@ -1,0 +1,1037 @@
+[
+  {
+    "iteration": 1,
+    "total_games": 100,
+    "policy_loss": 3.366238968132078,
+    "value_loss": 0.1143611030783071,
+    "total_loss": 3.4806000709533693,
+    "network_entropy": 3.3910700805427494,
+    "target_entropy": 2.715830275439477
+  },
+  {
+    "iteration": 2,
+    "total_games": 200,
+    "policy_loss": 3.4581707146432663,
+    "value_loss": 0.11557717552438142,
+    "total_loss": 3.5737478901469517,
+    "network_entropy": 3.46799163061475,
+    "target_entropy": 2.6864616568126376
+  },
+  {
+    "iteration": 3,
+    "total_games": 300,
+    "policy_loss": 3.53640345442232,
+    "value_loss": 0.1182850080547194,
+    "total_loss": 3.6546884611170127,
+    "network_entropy": 3.5359907957611894,
+    "target_entropy": 2.798094350068027
+  },
+  {
+    "iteration": 4,
+    "total_games": 400,
+    "policy_loss": 3.5223792397832296,
+    "value_loss": 0.11017060832655334,
+    "total_loss": 3.632549847752215,
+    "network_entropy": 3.5233310401679043,
+    "target_entropy": 2.7192420703819
+  },
+  {
+    "iteration": 5,
+    "total_games": 500,
+    "policy_loss": 3.5517425982005286,
+    "value_loss": 0.11481501532932431,
+    "total_loss": 3.666557611879169,
+    "network_entropy": 3.5514071282017174,
+    "target_entropy": 2.7074706124727044
+  },
+  {
+    "iteration": 6,
+    "total_games": 600,
+    "policy_loss": 3.539648744816951,
+    "value_loss": 0.10727119308642366,
+    "total_loss": 3.646919939471999,
+    "network_entropy": 3.5395014986190585,
+    "target_entropy": 2.752307948921666
+  },
+  {
+    "iteration": 7,
+    "total_games": 700,
+    "policy_loss": 3.552534140211163,
+    "value_loss": 0.10633887852683212,
+    "total_loss": 3.6588730186693597,
+    "network_entropy": 3.5524915043801975,
+    "target_entropy": 2.7663747367858886
+  },
+  {
+    "iteration": 8,
+    "total_games": 800,
+    "policy_loss": 3.5463270815959382,
+    "value_loss": 0.10799647010501148,
+    "total_loss": 3.654323553241701,
+    "network_entropy": 3.546530057234286,
+    "target_entropy": 2.735658148165788
+  },
+  {
+    "iteration": 9,
+    "total_games": 900,
+    "policy_loss": 3.560811665353849,
+    "value_loss": 0.10715245520623848,
+    "total_loss": 3.667964121768641,
+    "network_entropy": 3.5608203191165777,
+    "target_entropy": 2.727820089759753
+  },
+  {
+    "iteration": 10,
+    "total_games": 1000,
+    "policy_loss": 3.583667942842267,
+    "value_loss": 0.10509916081461029,
+    "total_loss": 3.6887671046227664,
+    "network_entropy": 3.583649539989448,
+    "target_entropy": 2.7239647073502486
+  },
+  {
+    "iteration": 11,
+    "total_games": 1100,
+    "policy_loss": 3.5946269446819272,
+    "value_loss": 0.10313159769517276,
+    "total_loss": 3.6977585417800864,
+    "network_entropy": 3.5945953353671456,
+    "target_entropy": 2.734604192882269
+  },
+  {
+    "iteration": 12,
+    "total_games": 1200,
+    "policy_loss": 3.6224269166444327,
+    "value_loss": 0.10903089636135332,
+    "total_loss": 3.731457812496302,
+    "network_entropy": 3.622253429631881,
+    "target_entropy": 2.7501691070445697
+  },
+  {
+    "iteration": 13,
+    "total_games": 1300,
+    "policy_loss": 3.6462466808160148,
+    "value_loss": 0.11286001539375219,
+    "total_loss": 3.759106696082486,
+    "network_entropy": 3.64604609588782,
+    "target_entropy": 2.782570712566376
+  },
+  {
+    "iteration": 14,
+    "total_games": 1400,
+    "policy_loss": 3.6599690432359524,
+    "value_loss": 0.11469027346279653,
+    "total_loss": 3.7746593160548714,
+    "network_entropy": 3.6599739228075707,
+    "target_entropy": 2.7885428421833516
+  },
+  {
+    "iteration": 15,
+    "total_games": 1500,
+    "policy_loss": 3.6709152603441058,
+    "value_loss": 0.11813290806538468,
+    "total_loss": 3.7890481681998716,
+    "network_entropy": 3.6708993571395174,
+    "target_entropy": 2.7971243037944173
+  },
+  {
+    "iteration": 16,
+    "total_games": 1600,
+    "policy_loss": 3.6879864063815795,
+    "value_loss": 0.1206681878691998,
+    "total_loss": 3.808654593481534,
+    "network_entropy": 3.688028834550277,
+    "target_entropy": 2.8138369369230407
+  },
+  {
+    "iteration": 17,
+    "total_games": 1700,
+    "policy_loss": 3.711021982456329,
+    "value_loss": 0.12778564491222139,
+    "total_loss": 3.8388076272341283,
+    "network_entropy": 3.711001465291736,
+    "target_entropy": 2.8287998953799343
+  },
+  {
+    "iteration": 18,
+    "total_games": 1800,
+    "policy_loss": 3.7203027029362876,
+    "value_loss": 0.12845362602843075,
+    "total_loss": 3.8487563292185465,
+    "network_entropy": 3.720396867787118,
+    "target_entropy": 2.838913946752473
+  },
+  {
+    "iteration": 19,
+    "total_games": 1900,
+    "policy_loss": 3.7383008220436706,
+    "value_loss": 0.13599667686982153,
+    "total_loss": 3.874297498757663,
+    "network_entropy": 3.738345985594798,
+    "target_entropy": 2.8578887652008302
+  },
+  {
+    "iteration": 20,
+    "total_games": 2000,
+    "policy_loss": 3.737086466242913,
+    "value_loss": 0.1388112654618313,
+    "total_loss": 3.8758977303314577,
+    "network_entropy": 3.737196050302635,
+    "target_entropy": 2.8432268108984435
+  },
+  {
+    "iteration": 21,
+    "total_games": 2100,
+    "policy_loss": 3.736712249318483,
+    "value_loss": 0.13884694159196254,
+    "total_loss": 3.875559192182177,
+    "network_entropy": 3.736848329141963,
+    "target_entropy": 2.839672648261886
+  },
+  {
+    "iteration": 22,
+    "total_games": 2200,
+    "policy_loss": 3.7448586993605812,
+    "value_loss": 0.14142514452583588,
+    "total_loss": 3.886283844908344,
+    "network_entropy": 3.745036513188918,
+    "target_entropy": 2.8449528800470327
+  },
+  {
+    "iteration": 23,
+    "total_games": 2300,
+    "policy_loss": 3.7505510974585805,
+    "value_loss": 0.14211157229520968,
+    "total_loss": 3.8926626696824207,
+    "network_entropy": 3.7506300033982267,
+    "target_entropy": 2.846909480774935
+  },
+  {
+    "iteration": 24,
+    "total_games": 2400,
+    "policy_loss": 3.7590511623129834,
+    "value_loss": 0.14222382318837795,
+    "total_loss": 3.9012749864842826,
+    "network_entropy": 3.7591333528088238,
+    "target_entropy": 2.8504275242191417
+  },
+  {
+    "iteration": 25,
+    "total_games": 2500,
+    "policy_loss": 3.763443547451482,
+    "value_loss": 0.14327933811673932,
+    "total_loss": 3.9067228854585045,
+    "network_entropy": 3.763577418043023,
+    "target_entropy": 2.846692571815561
+  },
+  {
+    "iteration": 26,
+    "total_games": 2600,
+    "policy_loss": 3.7739058865687642,
+    "value_loss": 0.14766489441889202,
+    "total_loss": 3.921570781737335,
+    "network_entropy": 3.77404625362204,
+    "target_entropy": 2.85904660417128
+  },
+  {
+    "iteration": 27,
+    "total_games": 2700,
+    "policy_loss": 3.7787710252358293,
+    "value_loss": 0.14657094790685987,
+    "total_loss": 3.9253419740985813,
+    "network_entropy": 3.7789099152130277,
+    "target_entropy": 2.863343289273881
+  },
+  {
+    "iteration": 28,
+    "total_games": 2800,
+    "policy_loss": 3.784319599842982,
+    "value_loss": 0.14745101949230568,
+    "total_loss": 3.931770620936687,
+    "network_entropy": 3.7844108461682264,
+    "target_entropy": 2.868378275487375
+  },
+  {
+    "iteration": 29,
+    "total_games": 2900,
+    "policy_loss": 3.784942746035731,
+    "value_loss": 0.14859217383519074,
+    "total_loss": 3.9335349202367205,
+    "network_entropy": 3.785038238478771,
+    "target_entropy": 2.876360573668958
+  },
+  {
+    "iteration": 30,
+    "total_games": 3000,
+    "policy_loss": 3.7885441867625658,
+    "value_loss": 0.14990101083650353,
+    "total_loss": 3.9384451977214456,
+    "network_entropy": 3.7886235587756496,
+    "target_entropy": 2.885600079348204
+  },
+  {
+    "iteration": 31,
+    "total_games": 3100,
+    "policy_loss": 3.7898926132004322,
+    "value_loss": 0.15060318233524725,
+    "total_loss": 3.9404957955788933,
+    "network_entropy": 3.7899620395843914,
+    "target_entropy": 2.8848236835275403
+  },
+  {
+    "iteration": 32,
+    "total_games": 3200,
+    "policy_loss": 3.79854778085134,
+    "value_loss": 0.15329747166559582,
+    "total_loss": 3.951845251826531,
+    "network_entropy": 3.79858796538773,
+    "target_entropy": 2.892829285055165
+  },
+  {
+    "iteration": 33,
+    "total_games": 3300,
+    "policy_loss": 3.793656979580049,
+    "value_loss": 0.15321906042542321,
+    "total_loss": 3.9468760412978217,
+    "network_entropy": 3.7937561481245465,
+    "target_entropy": 2.892827167986034
+  },
+  {
+    "iteration": 34,
+    "total_games": 3400,
+    "policy_loss": 3.790981041876703,
+    "value_loss": 0.15303256835334741,
+    "total_loss": 3.944013609751139,
+    "network_entropy": 3.791051193798251,
+    "target_entropy": 2.9002472499416614
+  },
+  {
+    "iteration": 35,
+    "total_games": 3500,
+    "policy_loss": 3.789159038554113,
+    "value_loss": 0.15421351200024938,
+    "total_loss": 3.9433725500708756,
+    "network_entropy": 3.7892389470747574,
+    "target_entropy": 2.9012803843142594
+  },
+  {
+    "iteration": 36,
+    "total_games": 3600,
+    "policy_loss": 3.7828668033739112,
+    "value_loss": 0.1539408962404675,
+    "total_loss": 3.9368077004822153,
+    "network_entropy": 3.7829562671840984,
+    "target_entropy": 2.9008980321217135
+  },
+  {
+    "iteration": 37,
+    "total_games": 3700,
+    "policy_loss": 3.7775793312597257,
+    "value_loss": 0.1526676555937242,
+    "total_loss": 3.930246986459441,
+    "network_entropy": 3.7776855960717097,
+    "target_entropy": 2.903821151307808
+  },
+  {
+    "iteration": 38,
+    "total_games": 3800,
+    "policy_loss": 3.7705757937468753,
+    "value_loss": 0.15276494353287703,
+    "total_loss": 3.9233407375390357,
+    "network_entropy": 3.7706753485278437,
+    "target_entropy": 2.9001397780207228
+  },
+  {
+    "iteration": 39,
+    "total_games": 3900,
+    "policy_loss": 3.769018302033762,
+    "value_loss": 0.15375731951779206,
+    "total_loss": 3.922775620887077,
+    "network_entropy": 3.769127815243979,
+    "target_entropy": 2.9048069463415547
+  },
+  {
+    "iteration": 40,
+    "total_games": 4000,
+    "policy_loss": 3.768749141172515,
+    "value_loss": 0.15359957580810843,
+    "total_loss": 3.9223487159328143,
+    "network_entropy": 3.7688291030709387,
+    "target_entropy": 2.916137672113258
+  },
+  {
+    "iteration": 41,
+    "total_games": 4100,
+    "policy_loss": 3.764624024901688,
+    "value_loss": 0.15464857859859202,
+    "total_loss": 3.9192726049192204,
+    "network_entropy": 3.7647567043122234,
+    "target_entropy": 2.9178533983897608
+  },
+  {
+    "iteration": 42,
+    "total_games": 4200,
+    "policy_loss": 3.7594023541027837,
+    "value_loss": 0.15448863350391306,
+    "total_loss": 3.913890987449602,
+    "network_entropy": 3.7595254925728168,
+    "target_entropy": 2.919937007592343
+  },
+  {
+    "iteration": 43,
+    "total_games": 4300,
+    "policy_loss": 3.7506282179724106,
+    "value_loss": 0.1532334118812046,
+    "total_loss": 3.903861630048332,
+    "network_entropy": 3.750769624137423,
+    "target_entropy": 2.923183990118651
+  },
+  {
+    "iteration": 44,
+    "total_games": 4400,
+    "policy_loss": 3.7492263681690914,
+    "value_loss": 0.15546468066014107,
+    "total_loss": 3.904691048101206,
+    "network_entropy": 3.749352598743445,
+    "target_entropy": 2.9227353273175023
+  },
+  {
+    "iteration": 46,
+    "total_games": 4600,
+    "policy_loss": 3.755138790188532,
+    "value_loss": 0.16010390346071005,
+    "total_loss": 3.915242693229813,
+    "network_entropy": 3.7553021797829627,
+    "target_entropy": 2.945409939387519
+  },
+  {
+    "iteration": 47,
+    "total_games": 4700,
+    "policy_loss": 3.751764089163966,
+    "value_loss": 0.1631498664414179,
+    "total_loss": 3.914913956600828,
+    "network_entropy": 3.751875346970208,
+    "target_entropy": 2.951037843509649
+  },
+  {
+    "iteration": 48,
+    "total_games": 4800,
+    "policy_loss": 3.747560693102459,
+    "value_loss": 0.16682464622955037,
+    "total_loss": 3.914385338311145,
+    "network_entropy": 3.747693227477059,
+    "target_entropy": 2.952182486682815
+  },
+  {
+    "iteration": 49,
+    "total_games": 4900,
+    "policy_loss": 3.748646995241184,
+    "value_loss": 0.16664705336734484,
+    "total_loss": 3.9152940483314516,
+    "network_entropy": 3.7487196708856203,
+    "target_entropy": 2.962993338668521
+  },
+  {
+    "iteration": 50,
+    "total_games": 5000,
+    "policy_loss": 3.746764965604003,
+    "value_loss": 0.1695613620997858,
+    "total_loss": 3.916326327748528,
+    "network_entropy": 3.746861210572195,
+    "target_entropy": 2.9693499207049254
+  },
+  {
+    "iteration": 51,
+    "total_games": 5100,
+    "policy_loss": 3.7503270441417764,
+    "value_loss": 0.16856985580124004,
+    "total_loss": 3.9188968991468647,
+    "network_entropy": 3.750422914896106,
+    "target_entropy": 2.980757134231599
+  },
+  {
+    "iteration": 52,
+    "total_games": 5200,
+    "policy_loss": 3.7516990303057773,
+    "value_loss": 0.16962130102015974,
+    "total_loss": 3.9213203316294507,
+    "network_entropy": 3.751817144984802,
+    "target_entropy": 2.9935799215564707
+  },
+  {
+    "iteration": 53,
+    "total_games": 5300,
+    "policy_loss": 3.7423732697211283,
+    "value_loss": 0.1708880256651734,
+    "total_loss": 3.91326129520277,
+    "network_entropy": 3.742485910859461,
+    "target_entropy": 2.990703417668364
+  },
+  {
+    "iteration": 54,
+    "total_games": 5400,
+    "policy_loss": 3.7406343604224164,
+    "value_loss": 0.1711027027081402,
+    "total_loss": 3.9117370617833003,
+    "network_entropy": 3.740736069918411,
+    "target_entropy": 3.0022410042983037
+  },
+  {
+    "iteration": 55,
+    "total_games": 5500,
+    "policy_loss": 3.737124024849628,
+    "value_loss": 0.1694849672424472,
+    "total_loss": 3.9066089935979513,
+    "network_entropy": 3.7372568153432106,
+    "target_entropy": 3.0010067180170212
+  },
+  {
+    "iteration": 56,
+    "total_games": 5600,
+    "policy_loss": 3.7338272234475154,
+    "value_loss": 0.1685784390088805,
+    "total_loss": 3.902405663164595,
+    "network_entropy": 3.7339637257059617,
+    "target_entropy": 2.998292989610446
+  },
+  {
+    "iteration": 57,
+    "total_games": 5700,
+    "policy_loss": 3.725346536109245,
+    "value_loss": 0.16794485600276923,
+    "total_loss": 3.893291392012368,
+    "network_entropy": 3.7254581597997483,
+    "target_entropy": 2.993995981418163
+  },
+  {
+    "iteration": 58,
+    "total_games": 5800,
+    "policy_loss": 3.71961595098625,
+    "value_loss": 0.1689020041133592,
+    "total_loss": 3.8885179549587825,
+    "network_entropy": 3.719761489886385,
+    "target_entropy": 2.9973650587414444
+  },
+  {
+    "iteration": 59,
+    "total_games": 5900,
+    "policy_loss": 3.716574269990716,
+    "value_loss": 0.1696848556917912,
+    "total_loss": 3.886259124222895,
+    "network_entropy": 3.7166684714408103,
+    "target_entropy": 3.0010633693624786
+  },
+  {
+    "iteration": 60,
+    "total_games": 6000,
+    "policy_loss": 3.7065624903103305,
+    "value_loss": 0.17124136764516767,
+    "total_loss": 3.8778038581293703,
+    "network_entropy": 3.706743932250253,
+    "target_entropy": 2.996522070108034
+  },
+  {
+    "iteration": 61,
+    "total_games": 6100,
+    "policy_loss": 3.7068102683519917,
+    "value_loss": 0.17115617017825688,
+    "total_loss": 3.8779664392969138,
+    "network_entropy": 3.7069486330410433,
+    "target_entropy": 3.0067904223764526
+  },
+  {
+    "iteration": 62,
+    "total_games": 6200,
+    "policy_loss": 3.696364574601568,
+    "value_loss": 0.17232423720557874,
+    "total_loss": 3.8686888123079193,
+    "network_entropy": 3.696511448190221,
+    "target_entropy": 2.99867579854824
+  },
+  {
+    "iteration": 63,
+    "total_games": 6300,
+    "policy_loss": 3.6938077486891343,
+    "value_loss": 0.1737156907341172,
+    "total_loss": 3.867523439391731,
+    "network_entropy": 3.693943093084142,
+    "target_entropy": 3.0054479539618075
+  },
+  {
+    "iteration": 64,
+    "total_games": 6400,
+    "policy_loss": 3.689865652882821,
+    "value_loss": 0.1720173802154335,
+    "total_loss": 3.861883033578691,
+    "network_entropy": 3.689995396645636,
+    "target_entropy": 3.007704087598704
+  },
+  {
+    "iteration": 65,
+    "total_games": 6500,
+    "policy_loss": 3.690884327994236,
+    "value_loss": 0.17197455463963374,
+    "total_loss": 3.862858882645054,
+    "network_entropy": 3.6909939802209495,
+    "target_entropy": 3.014277119133831
+  },
+  {
+    "iteration": 66,
+    "total_games": 6600,
+    "policy_loss": 3.685392973505161,
+    "value_loss": 0.17251706561845792,
+    "total_loss": 3.857910039733189,
+    "network_entropy": 3.6855525150676507,
+    "target_entropy": 3.011557905586943
+  },
+  {
+    "iteration": 67,
+    "total_games": 6700,
+    "policy_loss": 3.680779625945675,
+    "value_loss": 0.17294893894676297,
+    "total_loss": 3.8537285648568504,
+    "network_entropy": 3.680921693858495,
+    "target_entropy": 3.01399199237843
+  },
+  {
+    "iteration": 68,
+    "total_games": 6800,
+    "policy_loss": 3.6811707923372463,
+    "value_loss": 0.17093996101579176,
+    "total_loss": 3.8521107526250113,
+    "network_entropy": 3.681298803477839,
+    "target_entropy": 3.017339542887391
+  },
+  {
+    "iteration": 69,
+    "total_games": 6900,
+    "policy_loss": 3.676141463396534,
+    "value_loss": 0.17009391737793622,
+    "total_loss": 3.846235380673807,
+    "network_entropy": 3.676308161762541,
+    "target_entropy": 3.012337703600714
+  },
+  {
+    "iteration": 70,
+    "total_games": 7000,
+    "policy_loss": 3.6734459299798794,
+    "value_loss": 0.1693068744872097,
+    "total_loss": 3.842752804360834,
+    "network_entropy": 3.6735591974652126,
+    "target_entropy": 3.017469458204209
+  },
+  {
+    "iteration": 71,
+    "total_games": 7100,
+    "policy_loss": 3.6710145825373357,
+    "value_loss": 0.17109414685437477,
+    "total_loss": 3.842108729576259,
+    "network_entropy": 3.6711871304474606,
+    "target_entropy": 3.016807212865381
+  },
+  {
+    "iteration": 72,
+    "total_games": 7200,
+    "policy_loss": 3.670213182498798,
+    "value_loss": 0.172576318503809,
+    "total_loss": 3.84278950014443,
+    "network_entropy": 3.6703402122919244,
+    "target_entropy": 3.0258084773203895
+  },
+  {
+    "iteration": 73,
+    "total_games": 7300,
+    "policy_loss": 3.6675131272960546,
+    "value_loss": 0.1752923160496526,
+    "total_loss": 3.8428054436202426,
+    "network_entropy": 3.6676413015471674,
+    "target_entropy": 3.0268337866016233
+  },
+  {
+    "iteration": 74,
+    "total_games": 7400,
+    "policy_loss": 3.6692270450891384,
+    "value_loss": 0.17639132263980925,
+    "total_loss": 3.8456183683420764,
+    "network_entropy": 3.669378352677688,
+    "target_entropy": 3.0348914131130713
+  },
+  {
+    "iteration": 75,
+    "total_games": 7500,
+    "policy_loss": 3.665423394030412,
+    "value_loss": 0.17600758583604253,
+    "total_loss": 3.84143098154722,
+    "network_entropy": 3.665522055803245,
+    "target_entropy": 3.035516854513631
+  },
+  {
+    "iteration": 76,
+    "total_games": 7600,
+    "policy_loss": 3.6623486324285572,
+    "value_loss": 0.17886450513307653,
+    "total_loss": 3.8412131373120104,
+    "network_entropy": 3.662505294682019,
+    "target_entropy": 3.0409356061284023
+  },
+  {
+    "iteration": 77,
+    "total_games": 7700,
+    "policy_loss": 3.6654409770061034,
+    "value_loss": 0.17873926726482867,
+    "total_loss": 3.844180243400045,
+    "network_entropy": 3.665554778838638,
+    "target_entropy": 3.050840138396644
+  },
+  {
+    "iteration": 78,
+    "total_games": 7800,
+    "policy_loss": 3.663403116042034,
+    "value_loss": 0.18090109946285649,
+    "total_loss": 3.8443042147977082,
+    "network_entropy": 3.6634957061859983,
+    "target_entropy": 3.045015985442688
+  },
+  {
+    "iteration": 79,
+    "total_games": 7900,
+    "policy_loss": 3.6603878816456894,
+    "value_loss": 0.17965738867704717,
+    "total_loss": 3.840045270542365,
+    "network_entropy": 3.660522100731034,
+    "target_entropy": 3.047406745729736
+  },
+  {
+    "iteration": 80,
+    "total_games": 8000,
+    "policy_loss": 3.6581409161508143,
+    "value_loss": 0.18064263779345896,
+    "total_loss": 3.8387835541344146,
+    "network_entropy": 3.6582442797234913,
+    "target_entropy": 3.0491654615197237
+  },
+  {
+    "iteration": 81,
+    "total_games": 8100,
+    "policy_loss": 3.656204305757479,
+    "value_loss": 0.17969704308899465,
+    "total_loss": 3.835901348243513,
+    "network_entropy": 3.6563728715485984,
+    "target_entropy": 3.0493199546440435
+  },
+  {
+    "iteration": 82,
+    "total_games": 8200,
+    "policy_loss": 3.658598121381465,
+    "value_loss": 0.18077941328612498,
+    "total_loss": 3.83937753475961,
+    "network_entropy": 3.658739084564594,
+    "target_entropy": 3.059865624633758
+  },
+  {
+    "iteration": 83,
+    "total_games": 8300,
+    "policy_loss": 3.6518988199178697,
+    "value_loss": 0.18165100122252573,
+    "total_loss": 3.833549820819596,
+    "network_entropy": 3.6520612335823293,
+    "target_entropy": 3.0550779044607808
+  },
+  {
+    "iteration": 84,
+    "total_games": 8400,
+    "policy_loss": 3.649737109181337,
+    "value_loss": 0.18391306329885876,
+    "total_loss": 3.833650172525443,
+    "network_entropy": 3.649909108216264,
+    "target_entropy": 3.056658082868979
+  },
+  {
+    "iteration": 85,
+    "total_games": 8500,
+    "policy_loss": 3.645785780483364,
+    "value_loss": 0.18288717453734374,
+    "total_loss": 3.828672956403552,
+    "network_entropy": 3.64593928871363,
+    "target_entropy": 3.0586372656775027
+  },
+  {
+    "iteration": 86,
+    "total_games": 8600,
+    "policy_loss": 3.641780394736674,
+    "value_loss": 0.1841158914341328,
+    "total_loss": 3.825896285654782,
+    "network_entropy": 3.6419047769203563,
+    "target_entropy": 3.060164489781885
+  },
+  {
+    "iteration": 87,
+    "total_games": 8700,
+    "policy_loss": 3.638316425566216,
+    "value_loss": 0.18439572543688743,
+    "total_loss": 3.8227121508027944,
+    "network_entropy": 3.638417086134344,
+    "target_entropy": 3.0611795770963357
+  },
+  {
+    "iteration": 88,
+    "total_games": 8800,
+    "policy_loss": 3.6363449127915692,
+    "value_loss": 0.18459446768393006,
+    "total_loss": 3.8209393800626796,
+    "network_entropy": 3.6364833595890187,
+    "target_entropy": 3.062997297767241
+  },
+  {
+    "iteration": 89,
+    "total_games": 8900,
+    "policy_loss": 3.6338789313858744,
+    "value_loss": 0.18552824052496195,
+    "total_loss": 3.8194071728229035,
+    "network_entropy": 3.6339784039608327,
+    "target_entropy": 3.063506995692102
+  },
+  {
+    "iteration": 90,
+    "total_games": 9000,
+    "policy_loss": 3.626810546411015,
+    "value_loss": 0.186034146187168,
+    "total_loss": 3.8128446922250188,
+    "network_entropy": 3.626929846707972,
+    "target_entropy": 3.0580450687909524
+  },
+  {
+    "iteration": 91,
+    "total_games": 9100,
+    "policy_loss": 3.6255671416074087,
+    "value_loss": 0.18418950811765658,
+    "total_loss": 3.809756650163305,
+    "network_entropy": 3.6257180490659717,
+    "target_entropy": 3.0585574231429216
+  },
+  {
+    "iteration": 92,
+    "total_games": 9200,
+    "policy_loss": 3.634844633516945,
+    "value_loss": 0.1852662479666995,
+    "total_loss": 3.820110882284372,
+    "network_entropy": 3.6349432287017707,
+    "target_entropy": 3.072030562550816
+  },
+  {
+    "iteration": 93,
+    "total_games": 9300,
+    "policy_loss": 3.6287817362509096,
+    "value_loss": 0.1872713444990251,
+    "total_loss": 3.816053080697061,
+    "network_entropy": 3.628919514711706,
+    "target_entropy": 3.065845219326768
+  },
+  {
+    "iteration": 94,
+    "total_games": 9400,
+    "policy_loss": 3.623176765018907,
+    "value_loss": 0.1863920880249644,
+    "total_loss": 3.809568853046413,
+    "network_entropy": 3.623312809913893,
+    "target_entropy": 3.0599797508326945
+  },
+  {
+    "iteration": 95,
+    "total_games": 9500,
+    "policy_loss": 3.625933594054551,
+    "value_loss": 0.1867028607499758,
+    "total_loss": 3.8126364547211495,
+    "network_entropy": 3.6260367098378468,
+    "target_entropy": 3.0664642081167948
+  },
+  {
+    "iteration": 96,
+    "total_games": 9600,
+    "policy_loss": 3.6203694325020517,
+    "value_loss": 0.18628247860794953,
+    "total_loss": 3.806651909527865,
+    "network_entropy": 3.62051114915622,
+    "target_entropy": 3.0650807719391713
+  },
+  {
+    "iteration": 97,
+    "total_games": 9700,
+    "policy_loss": 3.622462396009999,
+    "value_loss": 0.18612868448891604,
+    "total_loss": 3.808591080964608,
+    "network_entropy": 3.6226245153564434,
+    "target_entropy": 3.068995184655972
+  },
+  {
+    "iteration": 98,
+    "total_games": 9800,
+    "policy_loss": 3.619958290228946,
+    "value_loss": 0.1856754590081339,
+    "total_loss": 3.805633748395172,
+    "network_entropy": 3.6201152969569894,
+    "target_entropy": 3.074072853512668
+  },
+  {
+    "iteration": 99,
+    "total_games": 9900,
+    "policy_loss": 3.6099011132921306,
+    "value_loss": 0.18642735543846067,
+    "total_loss": 3.79632846813729,
+    "network_entropy": 3.6100816401309506,
+    "target_entropy": 3.063351875570031
+  },
+  {
+    "iteration": 100,
+    "total_games": 10000,
+    "policy_loss": 3.613727258423903,
+    "value_loss": 0.1852322040158138,
+    "total_loss": 3.798959463832729,
+    "network_entropy": 3.6138613745443084,
+    "target_entropy": 3.0729069830817357
+  },
+  {
+    "iteration": 101,
+    "total_games": 10100,
+    "policy_loss": 3.6103408048357095,
+    "value_loss": 0.18642541600988002,
+    "total_loss": 3.7967662206732427,
+    "network_entropy": 3.6105157063301005,
+    "target_entropy": 3.0682107350151924
+  },
+  {
+    "iteration": 102,
+    "total_games": 10200,
+    "policy_loss": 3.616857636190445,
+    "value_loss": 0.18471862901267808,
+    "total_loss": 3.801576265366319,
+    "network_entropy": 3.6170073118440853,
+    "target_entropy": 3.0823706859047197
+  },
+  {
+    "iteration": 103,
+    "total_games": 10300,
+    "policy_loss": 3.619313214314102,
+    "value_loss": 0.18640262062630528,
+    "total_loss": 3.8057158345860533,
+    "network_entropy": 3.6194741502226275,
+    "target_entropy": 3.088371436159101
+  },
+  {
+    "iteration": 104,
+    "total_games": 10400,
+    "policy_loss": 3.6220055640658924,
+    "value_loss": 0.18654513926696795,
+    "total_loss": 3.8085507041315543,
+    "network_entropy": 3.622140754054163,
+    "target_entropy": 3.0933585892517548
+  },
+  {
+    "iteration": 105,
+    "total_games": 10500,
+    "policy_loss": 3.6225806769394135,
+    "value_loss": 0.1872812173358209,
+    "total_loss": 3.809861894940728,
+    "network_entropy": 3.622773188301745,
+    "target_entropy": 3.0972803003753016
+  },
+  {
+    "iteration": 106,
+    "total_games": 10600,
+    "policy_loss": 3.6192650210609294,
+    "value_loss": 0.18663009639609515,
+    "total_loss": 3.80589511736958,
+    "network_entropy": 3.619405037972025,
+    "target_entropy": 3.0977616899699245
+  },
+  {
+    "iteration": 107,
+    "total_games": 10700,
+    "policy_loss": 3.622644330909414,
+    "value_loss": 0.18659401600351108,
+    "total_loss": 3.8092383464746855,
+    "network_entropy": 3.622834871393631,
+    "target_entropy": 3.101874916238697
+  },
+  {
+    "iteration": 108,
+    "total_games": 10800,
+    "policy_loss": 3.6297144821177403,
+    "value_loss": 0.18718028572009554,
+    "total_loss": 3.816894768155585,
+    "network_entropy": 3.6298597155394954,
+    "target_entropy": 3.116640172757943
+  },
+  {
+    "iteration": 109,
+    "total_games": 10900,
+    "policy_loss": 3.622131766885753,
+    "value_loss": 0.1884416869234933,
+    "total_loss": 3.8105734537828093,
+    "network_entropy": 3.622322518261819,
+    "target_entropy": 3.1083279641892307
+  },
+  {
+    "iteration": 110,
+    "total_games": 11000,
+    "policy_loss": 3.616581044803907,
+    "value_loss": 0.18854450210852658,
+    "total_loss": 3.8051255478138244,
+    "network_entropy": 3.616777030244617,
+    "target_entropy": 3.108656498906719
+  },
+  {
+    "iteration": 111,
+    "total_games": 11100,
+    "policy_loss": 3.612743606749593,
+    "value_loss": 0.1879208907230809,
+    "total_loss": 3.800664496836667,
+    "network_entropy": 3.6128971290523304,
+    "target_entropy": 3.1048998618605843
+  },
+  {
+    "iteration": 112,
+    "total_games": 11200,
+    "policy_loss": 3.6169835618232877,
+    "value_loss": 0.1851048912267073,
+    "total_loss": 3.8020884535817796,
+    "network_entropy": 3.617136881433628,
+    "target_entropy": 3.1147227722318944
+  },
+  {
+    "iteration": 113,
+    "total_games": 11300,
+    "policy_loss": 3.614030964632402,
+    "value_loss": 0.18487276097169228,
+    "total_loss": 3.7989037250179107,
+    "network_entropy": 3.6141921386341314,
+    "target_entropy": 3.1122125534342646
+  },
+  {
+    "iteration": 114,
+    "total_games": 11400,
+    "policy_loss": 3.6063002037945076,
+    "value_loss": 0.18171511720478312,
+    "total_loss": 3.788015320161958,
+    "network_entropy": 3.6064626002140883,
+    "target_entropy": 3.105301790471697
+  },
+  {
+    "iteration": 115,
+    "total_games": 11500,
+    "policy_loss": 3.6138593210860024,
+    "value_loss": 0.18309346945852764,
+    "total_loss": 3.7969527905892693,
+    "network_entropy": 3.6140145379095427,
+    "target_entropy": 3.1200150552767205
+  },
+  {
+    "iteration": 116,
+    "total_games": 11600,
+    "policy_loss": 3.6090997926613775,
+    "value_loss": 0.1842283364206156,
+    "total_loss": 3.793328129427704,
+    "network_entropy": 3.6092508384694177,
+    "target_entropy": 3.1158052255415094
+  }
+]

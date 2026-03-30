@@ -74,7 +74,7 @@ def plot_loss_curves(metrics: List[Dict], output_path: str = "./logs/loss_curves
     total_loss = [m['total_loss'] for m in metrics]
     d_entropy = [m['target_entropy'] - m['network_entropy'] for m in metrics]
 
-    fig, axes = plt.subplots(2, 3, figsize=(15, 8))
+    fig, axes = plt.subplots(2, 2, figsize=(12, 8))
 
     # Policy loss
     axes[0][0].plot(iterations, policy_loss, linewidth=2, color='#2196F3')
@@ -91,18 +91,18 @@ def plot_loss_curves(metrics: List[Dict], output_path: str = "./logs/loss_curves
     axes[0][1].grid(True, alpha=0.3)
 
     # Total loss
-    axes[0][2].plot(iterations, total_loss, linewidth=2, color='#FF5722')
-    axes[0][2].set_xlabel('Iteration')
-    axes[0][2].set_ylabel('Total Loss')
-    axes[0][2].set_title('Total Loss Over Training')
-    axes[0][2].grid(True, alpha=0.3)
+    axes[1][0].plot(iterations, total_loss, linewidth=2, color='#FF5722')
+    axes[1][0].set_xlabel('Iteration')
+    axes[1][0].set_ylabel('Total Loss')
+    axes[1][0].set_title('Total Loss Over Training')
+    axes[1][0].grid(True, alpha=0.3)
 
     # Delta entropy
-    axes[1][0].plot(iterations, d_entropy, linewidth=2)
-    axes[1][0].set_xlabel('Iteration')
-    axes[1][0].set_ylabel('Delta Entropy')
-    axes[1][0].set_title('Delta Entropy Over Training')
-    axes[1][0].grid(True, alpha=0.3)
+    axes[1][1].plot(iterations, d_entropy, linewidth=2)
+    axes[1][1].set_xlabel('Iteration')
+    axes[1][1].set_ylabel('Delta Entropy')
+    axes[1][1].set_title('Delta Entropy Over Training')
+    axes[1][1].grid(True, alpha=0.3)
 
     plt.tight_layout()
     plt.savefig(output_path, dpi=150, bbox_inches='tight')
