@@ -19,11 +19,9 @@ class Board:
     def check_win(self):
         seqs = count_sequences(self.base, 1, self.base.shape[0])
         if seqs[5] >= 1:
-          print("Player 1 wins")
           return True
         seqs = count_sequences(self.base, 2, self.base.shape[0])
         if seqs[5] >= 1:
-          print("Player 2 wins")
           return True
         
         return False
