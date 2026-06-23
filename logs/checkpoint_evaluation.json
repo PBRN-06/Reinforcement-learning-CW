@@ -1,0 +1,338 @@
+{
+  "metadata": {
+    "checkpoint_dir": "./checkpoints",
+    "num_games": 20,
+    "simulations": 1600,
+    "mcts_simulations": 1600,
+    "board_size": 9,
+    "timestamp": "2026-03-30T02:01:03.854565"
+  },
+  "vs_random": [
+    {
+      "wins": 19,
+      "losses": 1,
+      "draws": 0,
+      "win_rate": 95.0,
+      "loss_rate": 5.0,
+      "draw_rate": 0.0,
+      "iteration": 1
+    },
+    {
+      "wins": 20,
+      "losses": 0,
+      "draws": 0,
+      "win_rate": 100.0,
+      "loss_rate": 0.0,
+      "draw_rate": 0.0,
+      "iteration": 5
+    },
+    {
+      "wins": 19,
+      "losses": 1,
+      "draws": 0,
+      "win_rate": 95.0,
+      "loss_rate": 5.0,
+      "draw_rate": 0.0,
+      "iteration": 10
+    },
+    {
+      "wins": 20,
+      "losses": 0,
+      "draws": 0,
+      "win_rate": 100.0,
+      "loss_rate": 0.0,
+      "draw_rate": 0.0,
+      "iteration": 15
+    },
+    {
+      "wins": 20,
+      "losses": 0,
+      "draws": 0,
+      "win_rate": 100.0,
+      "loss_rate": 0.0,
+      "draw_rate": 0.0,
+      "iteration": 21
+    },
+    {
+      "wins": 20,
+      "losses": 0,
+      "draws": 0,
+      "win_rate": 100.0,
+      "loss_rate": 0.0,
+      "draw_rate": 0.0,
+      "iteration": 30
+    },
+    {
+      "wins": 20,
+      "losses": 0,
+      "draws": 0,
+      "win_rate": 100.0,
+      "loss_rate": 0.0,
+      "draw_rate": 0.0,
+      "iteration": 36
+    },
+    {
+      "wins": 20,
+      "losses": 0,
+      "draws": 0,
+      "win_rate": 100.0,
+      "loss_rate": 0.0,
+      "draw_rate": 0.0,
+      "iteration": 39
+    },
+    {
+      "wins": 20,
+      "losses": 0,
+      "draws": 0,
+      "win_rate": 100.0,
+      "loss_rate": 0.0,
+      "draw_rate": 0.0,
+      "iteration": 45
+    },
+    {
+      "wins": 20,
+      "losses": 0,
+      "draws": 0,
+      "win_rate": 100.0,
+      "loss_rate": 0.0,
+      "draw_rate": 0.0,
+      "iteration": 50
+    },
+    {
+      "wins": 20,
+      "losses": 0,
+      "draws": 0,
+      "win_rate": 100.0,
+      "loss_rate": 0.0,
+      "draw_rate": 0.0,
+      "iteration": 60
+    },
+    {
+      "wins": 20,
+      "losses": 0,
+      "draws": 0,
+      "win_rate": 100.0,
+      "loss_rate": 0.0,
+      "draw_rate": 0.0,
+      "iteration": 70
+    },
+    {
+      "wins": 20,
+      "losses": 0,
+      "draws": 0,
+      "win_rate": 100.0,
+      "loss_rate": 0.0,
+      "draw_rate": 0.0,
+      "iteration": 80
+    },
+    {
+      "wins": 20,
+      "losses": 0,
+      "draws": 0,
+      "win_rate": 100.0,
+      "loss_rate": 0.0,
+      "draw_rate": 0.0,
+      "iteration": 90
+    },
+    {
+      "wins": 20,
+      "losses": 0,
+      "draws": 0,
+      "win_rate": 100.0,
+      "loss_rate": 0.0,
+      "draw_rate": 0.0,
+      "iteration": 100
+    },
+    {
+      "wins": 20,
+      "losses": 0,
+      "draws": 0,
+      "win_rate": 100.0,
+      "loss_rate": 0.0,
+      "draw_rate": 0.0,
+      "iteration": 110
+    },
+    {
+      "wins": 20,
+      "losses": 0,
+      "draws": 0,
+      "win_rate": 100.0,
+      "loss_rate": 0.0,
+      "draw_rate": 0.0,
+      "iteration": 120
+    },
+    {
+      "wins": 20,
+      "losses": 0,
+      "draws": 0,
+      "win_rate": 100.0,
+      "loss_rate": 0.0,
+      "draw_rate": 0.0,
+      "iteration": 130
+    }
+  ],
+  "vs_mcts": [
+    {
+      "wins": 2,
+      "losses": 18,
+      "draws": 0,
+      "win_rate": 10.0,
+      "loss_rate": 90.0,
+      "draw_rate": 0.0,
+      "iteration": 1
+    },
+    {
+      "wins": 0,
+      "losses": 20,
+      "draws": 0,
+      "win_rate": 0.0,
+      "loss_rate": 100.0,
+      "draw_rate": 0.0,
+      "iteration": 5
+    },
+    {
+      "wins": 1,
+      "losses": 19,
+      "draws": 0,
+      "win_rate": 5.0,
+      "loss_rate": 95.0,
+      "draw_rate": 0.0,
+      "iteration": 10
+    },
+    {
+      "wins": 3,
+      "losses": 17,
+      "draws": 0,
+      "win_rate": 15.0,
+      "loss_rate": 85.0,
+      "draw_rate": 0.0,
+      "iteration": 15
+    },
+    {
+      "wins": 7,
+      "losses": 13,
+      "draws": 0,
+      "win_rate": 35.0,
+      "loss_rate": 65.0,
+      "draw_rate": 0.0,
+      "iteration": 21
+    },
+    {
+      "wins": 12,
+      "losses": 8,
+      "draws": 0,
+      "win_rate": 60.0,
+      "loss_rate": 40.0,
+      "draw_rate": 0.0,
+      "iteration": 30
+    },
+    {
+      "wins": 15,
+      "losses": 5,
+      "draws": 0,
+      "win_rate": 75.0,
+      "loss_rate": 25.0,
+      "draw_rate": 0.0,
+      "iteration": 36
+    },
+    {
+      "wins": 15,
+      "losses": 5,
+      "draws": 0,
+      "win_rate": 75.0,
+      "loss_rate": 25.0,
+      "draw_rate": 0.0,
+      "iteration": 39
+    },
+    {
+      "wins": 13,
+      "losses": 7,
+      "draws": 0,
+      "win_rate": 65.0,
+      "loss_rate": 35.0,
+      "draw_rate": 0.0,
+      "iteration": 45
+    },
+    {
+      "wins": 14,
+      "losses": 6,
+      "draws": 0,
+      "win_rate": 70.0,
+      "loss_rate": 30.0,
+      "draw_rate": 0.0,
+      "iteration": 50
+    },
+    {
+      "wins": 18,
+      "losses": 2,
+      "draws": 0,
+      "win_rate": 90.0,
+      "loss_rate": 10.0,
+      "draw_rate": 0.0,
+      "iteration": 60
+    },
+    {
+      "wins": 16,
+      "losses": 4,
+      "draws": 0,
+      "win_rate": 80.0,
+      "loss_rate": 20.0,
+      "draw_rate": 0.0,
+      "iteration": 70
+    },
+    {
+      "wins": 17,
+      "losses": 3,
+      "draws": 0,
+      "win_rate": 85.0,
+      "loss_rate": 15.0,
+      "draw_rate": 0.0,
+      "iteration": 80
+    },
+    {
+      "wins": 20,
+      "losses": 0,
+      "draws": 0,
+      "win_rate": 100.0,
+      "loss_rate": 0.0,
+      "draw_rate": 0.0,
+      "iteration": 90
+    },
+    {
+      "wins": 17,
+      "losses": 3,
+      "draws": 0,
+      "win_rate": 85.0,
+      "loss_rate": 15.0,
+      "draw_rate": 0.0,
+      "iteration": 100
+    },
+    {
+      "wins": 20,
+      "losses": 0,
+      "draws": 0,
+      "win_rate": 100.0,
+      "loss_rate": 0.0,
+      "draw_rate": 0.0,
+      "iteration": 110
+    },
+    {
+      "wins": 18,
+      "losses": 2,
+      "draws": 0,
+      "win_rate": 90.0,
+      "loss_rate": 10.0,
+      "draw_rate": 0.0,
+      "iteration": 120
+    },
+    {
+      "wins": 18,
+      "losses": 2,
+      "draws": 0,
+      "win_rate": 90.0,
+      "loss_rate": 10.0,
+      "draw_rate": 0.0,
+      "iteration": 130
+    }
+  ]
+}
